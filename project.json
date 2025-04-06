@@ -1,5 +1,5 @@
 {
-  "name": "@radio-script-api-workspace/source",
+  "name": "@radio-script-backend/source",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
     "local-registry": {

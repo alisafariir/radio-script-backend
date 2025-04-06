@@ -1,0 +1,43 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/auth": ["features/auth/src/index.ts"],
+      "@/comment": ["features/comment/src/index.ts"],
+      "@/constants": ["libs/constants/src/index.ts"],
+      "@/database": ["libs/database/src/index.ts"],
+      "@/decorators": ["libs/decorators/src/index.ts"],
+      "@/dtos": ["libs/dtos/src/index.ts"],
+      "@/entities": ["libs/entities/src/index.ts"],
+      "@/enums": ["libs/enums/src/index.ts"],
+      "@/environments": ["libs/environments/src/index.ts"],
+      "@/filters": ["libs/filters/src/index.ts"],
+      "@/guards": ["libs/guards/src/index.ts"],
+      "@/helpers": ["libs/helpers/src/index.ts"],
+      "@/interceptors": ["libs/interceptors/src/index.ts"],
+      "@/interfaces": ["libs/interfaces/src/index.ts"],
+      "@/mail": ["features/mail/src/index.ts"],
+      "@/media": ["features/media/src/index.ts"],
+      "@/otp": ["features/otp/src/index.ts"],
+      "@/sms": ["features/sms/src/index.ts"],
+      "@/strategies": ["libs/strategies/src/index.ts"],
+      "@/token": ["features/token/src/index.ts"],
+      "@/user": ["features/user/src/index.ts"],
+      "@/types": ["libs/types/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

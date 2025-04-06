@@ -1,0 +1,40 @@
+# ----------------------------------------------------
+# 1) Node Modules
+# ----------------------------------------------------
+node_modules
+**/node_modules
+
+# ----------------------------------------------------
+# 2) Nx Cache & Output
+# ----------------------------------------------------
+.nx
+node_modules/.cache
+dist
+coverage
+
+# ----------------------------------------------------
+# 3) Logs & OS metadata
+# ----------------------------------------------------
+*.log
+.DS_Store
+Thumbs.db
+
+# ----------------------------------------------------
+# 4) Environment Files (optional)
+# ----------------------------------------------------
+# *.env
+
+# ----------------------------------------------------
+# 5) Git
+# ----------------------------------------------------
+.git
+.gitignore
+
+# ----------------------------------------------------
+# 6) Docker
+# ----------------------------------------------------
+# Typically, we keep the Dockerfile in the build context
+# so it should not be ignored. If your Dockerfile is named
+# differently or if you have multiple Dockerfiles, only ignore
+# them if you're sure you don't need them in the build.
+.dockerignore

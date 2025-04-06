@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "target": "es2021"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../interfaces/src/lib/auth/user-response.model.ts"
+  ]
+}

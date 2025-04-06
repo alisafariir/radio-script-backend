@@ -1,0 +1,146 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_DOMAIN_WILDCARD: ${{ secrets.APP_DOMAIN_WILDCARD }}
+  ALLOW_ORIGINS: ${{ secrets.ALLOW_ORIGINS }}
+  APP_IMAGE_NAME: ${{ secrets.APP_IMAGE_NAME }}
+  APP_NAME: ${{ secrets.APP_NAME }}
+  APP_PORT: ${{ secrets.APP_PORT }}
+
+  S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+  S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+  S3_REGION: ${{ secrets.S3_REGION }}
+  S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+  S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+
+  DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+
+  ENCRYPT_SECRET_KEY: ${{ secrets.ENCRYPT_SECRET_KEY }}
+
+  GH_AUTH_CALLBACK_URL: ${{ secrets.GH_AUTH_CALLBACK_URL }}
+  GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+  GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
+
+  GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+  GMAIL_USER: ${{ secrets.GMAIL_USER }}
+
+  GOOGLE_AUTH_CALLBACK_URL: ${{ secrets.GOOGLE_AUTH_CALLBACK_URL }}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+  JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+
+  SERVER_IP: ${{ secrets.SERVER_IP }}
+  SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
+
+  SMS_SERVICE_ENDPOINT: ${{ secrets.SMS_SERVICE_ENDPOINT }}
+  SMS_SERVICE_BODY_ID: ${{ secrets.SMS_SERVICE_BODY_ID }}
+  SMS_SERVICE_TOKEN: ${{ secrets.SMS_SERVICE_TOKEN }}
+
+  SMTP_HOST: ${{ secrets.SMTP_HOST }}
+  SMTP_PORT: ${{ secrets.SMTP_PORT }}
+
+  SOCIAL_AUTH_FRONT_END_CALLBACK_URL: ${{ secrets.SOCIAL_AUTH_FRONT_END_CALLBACK_URL }}
+
+  SSH_PORT: ${{ secrets.SSH_PORT }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+  DOCKER_FILE_PATH: apps/radio-script/Dockerfile
+  REMOTE_DIR_PATH: /tmp/${{ secrets.APP_IMAGE_NAME }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ env.APP_IMAGE_NAME }} -f ${{ env.DOCKER_FILE_PATH }} .
+      - name: Save Docker Image
+        run: |
+          docker save -o ${{ env.APP_IMAGE_NAME }}.tar ${{ env.APP_IMAGE_NAME }}
+          chmod 644 ${{ env.APP_IMAGE_NAME }}.tar
+          ls -l ${{ env.APP_IMAGE_NAME }}.tar
+      - name: Create .env File
+        run: |
+          touch .env
+          echo APP_DOMAIN_WILDCARD=${{ env.APP_DOMAIN_WILDCARD }} >> .env
+          echo ALLOW_ORIGINS=${{ env.ALLOW_ORIGINS }} >> .env
+          echo APP_IMAGE_NAME=${{ env.APP_IMAGE_NAME }} >> .env
+          echo APP_NAME=${{ env.APP_NAME }} >> .env
+          echo APP_PORT=${{ env.APP_PORT }} >> .env
+
+          echo S3_ACCESS_KEY_ID=${{ env.S3_ACCESS_KEY_ID }} >> .env
+          echo S3_ENDPOINT=${{ env.S3_ENDPOINT }} >> .env
+          echo S3_REGION=${{ env.S3_REGION }} >> .env
+          echo S3_BUCKET_NAME=${{ env.S3_BUCKET_NAME }} >> .env
+          echo S3_SECRET_ACCESS_KEY=${{ env.S3_SECRET_ACCESS_KEY }} >> .env
+
+          echo DATABASE_HOST=${{ env.DATABASE_HOST }} >> .env
+          echo DATABASE_NAME=${{ env.DATABASE_NAME }} >> .env
+          echo DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} >> .env
+          echo DATABASE_PORT=${{ env.DATABASE_PORT }} >> .env
+          echo DATABASE_USER=${{ env.DATABASE_USER }} >> .env
+
+          echo ENCRYPT_SECRET_KEY=${{ env.ENCRYPT_SECRET_KEY }} >> .env
+
+          echo GH_AUTH_CALLBACK_URL=${{ env.GH_AUTH_CALLBACK_URL }} >> .env
+          echo GH_CLIENT_ID=${{ env.GH_CLIENT_ID }} >> .env
+          echo GH_CLIENT_SECRET=${{ env.GH_CLIENT_SECRET }} >> .env
+
+          echo GMAIL_PASSWORD=${{ env.GMAIL_PASSWORD }} >> .env
+          echo GMAIL_USER=${{ env.GMAIL_USER }} >> .env
+
+          echo GOOGLE_AUTH_CALLBACK_URL=${{ env.GOOGLE_AUTH_CALLBACK_URL }} >> .env
+          echo GOOGLE_CLIENT_ID=${{ env.GOOGLE_CLIENT_ID }} >> .env
+          echo GOOGLE_CLIENT_SECRET=${{ env.GOOGLE_CLIENT_SECRET }} >> .env
+
+          echo JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }} >> .env
+
+          echo SERVER_IP=${{ env.SERVER_IP }} >> .env
+          echo SERVER_USERNAME=${{ env.SERVER_USERNAME }} >> .env
+
+          echo SMS_SERVICE_ENDPOINT=${{ env.SMS_SERVICE_ENDPOINT }} >> .env
+          echo SMS_SERVICE_BODY_ID=${{ env.SMS_SERVICE_BODY_ID }} >> .env
+          echo SMS_SERVICE_TOKEN=${{ env.SMS_SERVICE_TOKEN }} >> .env
+
+          echo SMTP_HOST=${{ env.SMTP_HOST }} >> .env
+          echo SMTP_PORT=${{ env.SMTP_PORT }} >> .env
+
+          echo SOCIAL_AUTH_FRONT_END_CALLBACK_URL=${{ env.SOCIAL_AUTH_FRONT_END_CALLBACK_URL }} >> .env
+
+          chmod 644 .env
+
+      - name: Set up SSH key and known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H -p "${{ env.SSH_PORT }}" "${{ env.SERVER_IP }}" >> ~/.ssh/known_hosts
+
+      - name: Copy .env and Image File to Remote Server
+        run: |
+          ssh -p ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ env.SERVER_USERNAME }}@${{ env.SERVER_IP }} "mkdir -p ${{ env.REMOTE_DIR_PATH }}"
+          scp -P ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ env.APP_IMAGE_NAME }}.tar ${{ env.SERVER_USERNAME }}@${{ env.SERVER_IP }}:${{ env.REMOTE_DIR_PATH }}/${{ env.APP_IMAGE_NAME }}.tar
+          scp -P ${{ env.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no .env ${{ env.SERVER_USERNAME }}@${{ env.SERVER_IP }}:${{ env.REMOTE_DIR_PATH }}/.env
+
+      - name: SSH to Remote Server and Run Docker Container
+        run: |
+          ssh -i ~/.ssh/id_rsa -p "${{ env.SSH_PORT }}" -o StrictHostKeyChecking=no ${{ env.SERVER_USERNAME }}@${{ env.SERVER_IP }} << 'EOF'
+            docker load -i ${{ env.REMOTE_DIR_PATH }}/${{ env.APP_IMAGE_NAME }}.tar
+            docker stop ${{ env.APP_IMAGE_NAME }} || true
+            docker rm ${{ env.APP_IMAGE_NAME }} || true
+            docker run -d -p ${{ env.APP_PORT }}:${{ env.APP_PORT }} --env-file ${{ env.REMOTE_DIR_PATH }}/.env --name ${{ env.APP_IMAGE_NAME }} ${{ env.APP_IMAGE_NAME }} 
+          EOF

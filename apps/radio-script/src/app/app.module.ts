@@ -1,6 +1,7 @@
 import { AuthModule } from '@/auth';
 import { DatabaseModule } from '@/database';
 import { EnvironmentModule } from '@/environments';
+import { GlobalExceptionFilter, PayloadTooLargeFilter, ThrottlerExceptionFilter } from '@/filters';
 import { EncryptionService, OtpService } from '@/helpers';
 import { MailModule } from '@/mail';
 import { MediaModule } from '@/media';
@@ -9,7 +10,7 @@ import { SmsModule } from '@/sms';
 import { TokenModule } from '@/token';
 import { UserModule } from '@/user';
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -40,6 +41,18 @@ import { AppService } from './app.service';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ThrottlerExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: PayloadTooLargeFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })

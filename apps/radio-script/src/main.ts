@@ -3,7 +3,6 @@
  * This is only a minimal backend to get started.
  */
 
-import { ThrottlerExceptionFilter } from '@/filters';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -20,8 +19,6 @@ async function bootstrap() {
   const allowedOrigins = configService.get<string>('ALLOW_ORIGINS').split(',');
 
   app.useGlobalPipes(new ValidationPipe());
-
-  app.useGlobalFilters(new ThrottlerExceptionFilter());
 
   app.use(cookieParser());
 

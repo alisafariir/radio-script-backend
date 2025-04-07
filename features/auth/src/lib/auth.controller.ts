@@ -20,8 +20,10 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() registerDto: RegisterDto, @Req() request: Request) {
-    return this.authService.register(registerDto, request['deviceInfo']);
+  async register(@Body() registerDto: RegisterDto, @Req() request: Request, @Res({ passthrough: true }) res: Response) {
+    const user = await this.authService.register(registerDto, request['deviceInfo']);
+    await this.cookieService.setResponseTokenCookies(res, user.access_token, user.refresh_token);
+    return user;
   }
 
   @Post('login')

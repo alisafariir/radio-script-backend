@@ -221,19 +221,10 @@ export class AuthService {
   }
 
   async getProfile(user_id: string) {
-    const { first_name, last_name, bio, avatar_url, email, phone_number, blocked, block_reason, created_by } = await this.userRepository.findOne({ where: { id: user_id } });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, tokens, id, media, ...filtredUserData } = await this.userRepository.findOne({ where: { id: user_id } });
 
-    return {
-      first_name,
-      last_name,
-      bio,
-      avatar_url,
-      email,
-      phone_number,
-      blocked,
-      block_reason,
-      created_by,
-    };
+    return filtredUserData;
   }
 
   async updateProfile(user_id: string, updateProfileDto: UpdateProfileDto) {

@@ -5,19 +5,19 @@ export abstract class BaseEntity extends TypeORMBaseEntity {
   id: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
-  updatedAt: Date;
+  updated_at: Date;
 
   @BeforeInsert()
   updateTimestampsOnInsert() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
+    this.created_at = new Date();
+    this.created_at = new Date();
   }
 
   @BeforeUpdate()
   updateTimestampsOnUpdate() {
-    this.updatedAt = new Date();
+    this.created_at = new Date();
   }
 }

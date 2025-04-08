@@ -4,7 +4,14 @@ import { CookieOptions, Response } from 'express';
 
 @Injectable()
 export class CookieService {
-  constructor(private configService: ConfigService) {}
+  maxAge: number;
+  expires: Date;
+
+  constructor(private configService: ConfigService) {
+    this.maxAge = 2147483647;
+    this.expires = new Date(this.maxAge * 1000);
+  }
+
   setCookieOptions() {
     const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
     const domain = this.configService.get<string>('APP_DOMAIN_WILDCARD');
@@ -28,13 +35,13 @@ export class CookieService {
     const cookieOptions = this.setCookieOptions();
     res.cookie('access_token', access_token, {
       ...cookieOptions,
-      maxAge: 1000 * 60 * 60,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      maxAge: this.maxAge,
+      expires: this.expires,
     });
     res.cookie('refresh_token', refresh_token, {
       ...cookieOptions,
-      maxAge: 1000 * 60 * 60 * 24 * 30,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      maxAge: this.maxAge,
+      expires: this.expires,
     });
   }
   async deleteResponseTokenCookies(res: Response) {

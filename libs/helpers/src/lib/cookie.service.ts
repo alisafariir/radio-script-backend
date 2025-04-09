@@ -8,8 +8,12 @@ export class CookieService {
   expires: Date;
 
   constructor(private configService: ConfigService) {
-    this.maxAge = 2147483647;
-    this.expires = new Date(this.maxAge * 1000);
+    const today = new Date();
+    const oneYearLater = new Date(today);
+    oneYearLater.setFullYear(today.getFullYear() + 1);
+
+    this.maxAge = oneYearLater.getTime();
+    this.expires = oneYearLater;
   }
 
   setCookieOptions() {
@@ -23,6 +27,8 @@ export class CookieService {
       secure: false,
       path: '/',
       domain,
+      maxAge: this.maxAge,
+      expires: this.expires,
     };
     if (isProduction) {
       cookieOptions.secure = true;
@@ -33,16 +39,8 @@ export class CookieService {
   }
   async setResponseTokenCookies(res: Response, access_token: string, refresh_token: string) {
     const cookieOptions = this.setCookieOptions();
-    res.cookie('access_token', access_token, {
-      ...cookieOptions,
-      maxAge: this.maxAge,
-      expires: this.expires,
-    });
-    res.cookie('refresh_token', refresh_token, {
-      ...cookieOptions,
-      maxAge: this.maxAge,
-      expires: this.expires,
-    });
+    res.cookie('access_token', access_token, cookieOptions);
+    res.cookie('refresh_token', refresh_token, cookieOptions);
   }
   async deleteResponseTokenCookies(res: Response) {
     const cookieOptions = this.setCookieOptions();

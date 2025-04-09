@@ -8,8 +8,11 @@ export class CookieService {
   expires: Date;
 
   constructor(private configService: ConfigService) {
-    this.maxAge = 2147483647;
-    this.expires = new Date(this.maxAge * 1000);
+    const today = new Date();
+    const oneYearLater = new Date(today);
+    oneYearLater.setFullYear(today.getFullYear() + 1);
+    this.maxAge = oneYearLater.getTime();
+    this.expires = oneYearLater;
   }
 
   setCookieOptions() {

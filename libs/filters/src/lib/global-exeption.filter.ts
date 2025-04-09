@@ -51,6 +51,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       error = 'Internal Server Error';
     }
 
+    if (status === HttpStatus.PAYLOAD_TOO_LARGE) {
+      response.status(status).json({
+        statusCode: status,
+        message: 'حجم فایل ارسالی شما بزرگتر از حد مجاز است. لطفاً فایل کوچکتری ارسال کنید.', // Custom message
+        error: 'حجم فایل ارسالی شما بزرگتر از حد مجاز است. لطفاً فایل کوچکتری ارسال کنید.',
+      });
+      return;
+    }
+
     // Log the error
     this.logger.error(
       `Error: ${status} - ${message}` +

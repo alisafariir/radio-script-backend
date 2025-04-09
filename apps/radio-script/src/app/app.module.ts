@@ -1,7 +1,7 @@
 import { AuthModule } from '@/auth';
 import { DatabaseModule } from '@/database';
 import { EnvironmentModule } from '@/environments';
-import { PayloadTooLargeFilter, ThrottlerExceptionFilter } from '@/filters';
+import { GlobalExceptionFilter, PayloadTooLargeFilter, ThrottlerExceptionFilter } from '@/filters';
 import { EncryptionService, OtpService } from '@/helpers';
 import { MailModule } from '@/mail';
 import { MediaModule } from '@/media';
@@ -42,18 +42,7 @@ import { AppService } from './app.service';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    {
-      provide: APP_FILTER,
-      useClass: ThrottlerExceptionFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: PayloadTooLargeFilter,
-    },
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: GlobalExceptionFilter,
-    // },
+   
   ],
 })
 export class AppModule {}

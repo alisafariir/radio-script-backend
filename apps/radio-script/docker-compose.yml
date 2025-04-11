@@ -1,9 +1,0 @@
-services:
-  apiradioscript:
-    container_name: api-radioscript-live
-    build:
-      context: ../..
-      dockerfile: apps/radio-script/Dockerfile
-    ports:
-      - "3001:3001"
-    restart: unless-stopped

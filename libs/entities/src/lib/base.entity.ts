@@ -10,7 +10,7 @@ export abstract class BaseEntity extends TypeORMBaseEntity {
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ default: null })
   deleted_at: Date;
 
   @BeforeInsert()

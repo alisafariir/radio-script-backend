@@ -34,38 +34,47 @@ export class AuthService {
       };
     }
 
-    if (email) {
-      await this.otpService.sendOtp(email);
-    }
-    if (phone_number) {
-      await this.otpService.sendOtp(phone_number);
-    }
+    await this.otpService.sendOtp(email);
 
     return { userExist: false };
   }
 
   async register({ email, phone_number, otp, password }: RegisterDto, deviceInfo: DeviceInfo) {
     const recipient = email ? email : phone_number;
+
+    await this.otpService.verifyOtp(otp, recipient);
+    const hashedPassword = await this.encryptionService.hash(password);
     const existingUser = await this.userRepository.findOne({
       where: [{ email }, { phone_number }],
+      withDeleted: true,
     });
 
     if (existingUser) {
       throw new ConflictException('حساب کاربری از قبل وجود دارد');
     }
 
-    await this.otpService.verifyOtp(otp, recipient);
-
-    const hashedPassword = await this.encryptionService.hash(password);
-    const user = this.userRepository.create({
-      email,
-      phone_number,
-      password: hashedPassword,
-      created_by: email ? 'email' : 'phone_number',
-    });
-    const createdUser = await this.userRepository.save(user);
-
-    return this.createToken(createdUser, deviceInfo);
+    if (existingUser?.deleted_at) {
+      // Restore and update the soft-deleted user
+      await this.userRepository.restore(existingUser.id);
+      const user = await this.userRepository.save({
+        ...existingUser,
+        password: hashedPassword,
+        phone_number,
+        email,
+        created_by: email ? 'email' : 'phone_number',
+        deletedAt: null,
+      });
+      return this.createToken(user, deviceInfo);
+    } else {
+      const user = this.userRepository.create({
+        email,
+        phone_number,
+        password: hashedPassword,
+        created_by: email ? 'email' : 'phone_number',
+      });
+      const createdUser = await this.userRepository.save(user);
+      return this.createToken(createdUser, deviceInfo);
+    }
   }
 
   async login({ email, phone_number, password }: LoginDto, deviceInfo: DeviceInfo) {
@@ -312,7 +321,14 @@ export class AuthService {
   async deleteAccount(user_id: string) {
     const user = await this.userRepository.findOne({ where: { id: user_id } });
     if (!user) throw new NotFoundException('کاربر یافت نشد.');
-    return await this.userRepository.softDelete(user.id);
+
+    if (user.role !== 'user') {
+      throw new BadRequestException('امکان حذف حساب کاربری برای نقش شما وجود ندارد. برای حذف حساب کاربری با پشتیبانی تماس بگیرید.');
+    }
+
+    await this.tokenService.deleteAllTokensByUserId(user.id);
+    await this.userRepository.delete(user.id);
+    return { message: 'حساب کاربری حذف شد' };
   }
 
   private createSocialCallbackUrl(access_token: string, refresh_token: string, provider: SocialLoginProvider) {

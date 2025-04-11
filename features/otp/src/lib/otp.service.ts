@@ -29,18 +29,20 @@ export class OtpService {
       switch (detectInputType(recipient)) {
         case 'email':
           type = 'email';
-          break;
+          await this.mailService.sendOtp(recipient, otp);
+          await this.createOtp({ otp: eOtp, recipient, otp_expiration, type });
+          return { message: 'رمز یکبار مصرف ارسال شد.' };
+
         case 'phone':
           type = 'sms';
-          break;
+          await this.smsService.sendOtp(recipient, otp);
+          await this.createOtp({ otp: eOtp, recipient, otp_expiration, type });
+          return { message: 'رمز یکبار مصرف ارسال شد.' };
+
         case 'invalid':
           type = 'invalid';
           throw new BadRequestException('مقدار دریافت کننده صحیح نیست.');
       }
-
-      await this.smsService.sendOtp(recipient, otp);
-      await this.createOtp({ otp: eOtp, recipient, otp_expiration, type });
-      return { message: 'رمز یکبار مصرف ارسال شد.' };
     } catch (error) {
       throw new BadRequestException('خطا در ارسال رمز یکبار‌مصرف', error);
     }
@@ -79,11 +81,11 @@ export class OtpService {
     });
 
     if (!foundedOtp) {
-      throw new BadRequestException('کد یکبار مصرف صحیح نیست');
+      throw new HttpException('کد یکبار مصرف صحیح نیست', 410);
     }
 
     const isValidOtp = await this.encryptionService.compare(otp, foundedOtp.otp);
-    if (!isValidOtp) throw new BadRequestException('کد یکبار مصرف صحیح نیست');
+    if (!isValidOtp) throw new HttpException('کد یکبار مصرف صحیح نیست', 410);
 
     const currentTime = new Date().getTime();
     const otp_expiration = new Date(foundedOtp.otp_expiration).getTime();

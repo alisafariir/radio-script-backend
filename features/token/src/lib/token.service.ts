@@ -57,6 +57,10 @@ export class TokenService {
     await this.tokenRepository.delete(token.id);
   }
 
+  async deleteAllTokensByUserId(user_id: string): Promise<void> {
+    await this.tokenRepository.delete({ user_id });
+  }
+
   async findTokenByUser(user_id: string): Promise<Token> {
     return this.tokenRepository.findOne({
       where: { user: { id: user_id } },

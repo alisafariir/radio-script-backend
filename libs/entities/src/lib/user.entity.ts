@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToMany } from 'typeorm';
 
 import { UserRole } from '@/enums';
 import { BaseEntity } from './base.entity';
@@ -6,6 +6,8 @@ import { Media } from './media.entity';
 import { Token } from './token.entity';
 
 @Entity()
+@Index(['email'], { where: 'deleted_at IS NULL' }) // Partial index for email
+@Index(['phone_number'], { where: 'deleted_at IS NULL' }) // Partial index for phone
 export class User extends BaseEntity {
   @Column({ unique: true, nullable: true })
   phone_number: string;
@@ -34,14 +36,14 @@ export class User extends BaseEntity {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.USER, // Default role is 'user'
+    default: UserRole.USER,
   })
   role: UserRole;
 
   @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];
 
-  @OneToMany(() => Media, (media) => media.user) // رابطه با فایل‌های رسانه
+  @OneToMany(() => Media, (media) => media.user)
   media: Media[];
 
   @Column({ nullable: true, default: false })

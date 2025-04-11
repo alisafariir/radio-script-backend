@@ -13,6 +13,9 @@
       "configurations": {
         "development": {
           "args": ["node-env=development"]
+        },
+        "test": {
+          "args": ["node-env=test"]
         }
       }
     },
@@ -27,6 +30,9 @@
       "configurations": {
         "development": {
           "buildTarget": "radio-script:build:development"
+        },
+        "test": {
+          "buildTarget": "radio-script:build:test"
         },
         "production": {
           "buildTarget": "radio-script:build:production"

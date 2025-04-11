@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "start:test": "npx nx run radio-script:serve --configuration=test",
     "start": "npx nx run radio-script:serve --configuration=development --watch=true",
     "start:debug": "npx nx run radio-script:serve --inspect=true --watch=true --configuration=development"
   },

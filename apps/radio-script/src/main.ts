@@ -3,12 +3,12 @@
  * This is only a minimal backend to get started.
  */
 
+import { GlobalExceptionFilter } from '@/filters';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app/app.module';
-import { GlobalExceptionFilter, PayloadTooLargeFilter } from '@/filters';
 async function bootstrap() {
   const globalPrefix = 'api';
   const defaultVersion = '1';
@@ -21,8 +21,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  app.useGlobalFilters( new GlobalExceptionFilter())
-  app.useGlobalFilters( new PayloadTooLargeFilter())
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.use(cookieParser());
 

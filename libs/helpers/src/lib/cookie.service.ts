@@ -42,9 +42,7 @@ export class CookieService {
     res.cookie('refresh_token', refresh_token, cookieOptions);
   }
   async deleteResponseTokenCookies(res: Response) {
-    const cookieOptions = this.setCookieOptions();
-
-    res.clearCookie('access_token', cookieOptions);
-    res.clearCookie('refresh_token', cookieOptions);
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
   }
 }

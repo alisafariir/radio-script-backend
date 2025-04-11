@@ -75,10 +75,15 @@ export class AuthService {
     if (!existingUser) {
       throw new NotFoundException('حساب کاربری یافت نشد.');
     }
+    if (existingUser.created_by === 'social_login') {
+      throw new BadRequestException('رمز عبور صحیح نیست، شما قبلا با ورود از طریق شبکه های اجتماعی ثبت نام کرده اید و برای حساب کاربری خود رمز عبور قرار نداده اید.');
+    }
     const isValidPassword = await this.encryptionService.compare(password, existingUser.password);
-    if (!isValidPassword) {
+
+    if (!password || !isValidPassword) {
       throw new BadRequestException('رمز عبور صحیح نمی‌باشد.');
     }
+
     const token = await this.createToken(existingUser, deviceInfo);
     const profile = await this.getProfile(existingUser.id);
     return { ...token, ...profile };
@@ -302,6 +307,12 @@ export class AuthService {
 
   async logout(request: Request) {
     return await this.tokenService.revokeTokenByRequest(request);
+  }
+
+  async deleteAccount(user_id: string) {
+    const user = await this.userRepository.findOne({ where: { id: user_id } });
+    if (!user) throw new NotFoundException('کاربر یافت نشد.');
+    return await this.userRepository.softDelete(user.id);
   }
 
   private createSocialCallbackUrl(access_token: string, refresh_token: string, provider: SocialLoginProvider) {

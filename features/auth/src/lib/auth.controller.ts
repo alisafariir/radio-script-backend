@@ -134,4 +134,13 @@ export class AuthController {
     await this.cookieService.deleteResponseTokenCookies(res);
     return await this.authService.logout(req);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete-account')
+  async deleteAccount(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const user_id = req['user']['sub'];
+    await this.cookieService.deleteResponseTokenCookies(res);
+    await this.authService.deleteAccount(user_id);
+    return { message: 'حساب کاربری حذف شد' };
+  }
 }

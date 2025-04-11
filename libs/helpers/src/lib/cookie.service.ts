@@ -11,7 +11,6 @@ export class CookieService {
     const today = new Date();
     const oneYearLater = new Date(today);
     oneYearLater.setFullYear(today.getFullYear() + 1);
-
     this.maxAge = oneYearLater.getTime();
     this.expires = oneYearLater;
   }

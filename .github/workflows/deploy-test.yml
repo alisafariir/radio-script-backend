@@ -54,7 +54,7 @@ env:
   SSH_PORT: ${{ secrets.SSH_PORT }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-  DOCKER_FILE_PATH: apps/radio-script/Dockerfile
+  DOCKER_FILE_PATH: apps/radio-script/test.Dockerfile
   REMOTE_DIR_PATH: /tmp/${{ secrets.APP_IMAGE_NAME }}
 
 jobs:

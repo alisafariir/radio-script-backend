@@ -76,6 +76,9 @@ jobs:
       - name: Create .env File
         run: |
           touch .env
+
+          echo NODE_ENV=test >> .env
+
           echo APP_DOMAIN_WILDCARD=${{ env.APP_DOMAIN_WILDCARD }} >> .env
           echo ALLOW_ORIGINS=${{ env.ALLOW_ORIGINS }} >> .env
           echo APP_IMAGE_NAME=${{ env.APP_IMAGE_NAME }} >> .env

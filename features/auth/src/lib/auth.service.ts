@@ -34,7 +34,7 @@ export class AuthService {
       };
     }
 
-    await this.otpService.sendOtp(email);
+    await this.otpService.sendOtp(email ? email : phone_number);
 
     return { userExist: false };
   }

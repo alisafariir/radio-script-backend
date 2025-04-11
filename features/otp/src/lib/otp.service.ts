@@ -22,53 +22,15 @@ export class OtpService {
       throw new BadRequestException('دریافت کننده الزامی است.');
     }
     try {
-      const otp = await this.generateOTP();
-      const eOtp = await this.encryptionService.hash(otp);
-      const otp_expiration = await this.generateExpireTime();
-      let type = 'invalid';
       switch (detectInputType(recipient)) {
         case 'email':
-          type = 'email';
-          await this.mailService.sendOtp(recipient, otp);
-          await this.createOtp({ otp: eOtp, recipient, otp_expiration, type });
-          return { message: 'رمز یکبار مصرف ارسال شد.' };
+          return await this.sendEmailOtp(recipient);
 
         case 'phone':
-          type = 'sms';
-          await this.smsService.sendOtp(recipient, otp);
-          await this.createOtp({ otp: eOtp, recipient, otp_expiration, type });
-          return { message: 'رمز یکبار مصرف ارسال شد.' };
+          return await this.sendSMSOtp(recipient);
 
         case 'invalid':
-          type = 'invalid';
           throw new BadRequestException('مقدار دریافت کننده صحیح نیست.');
-      }
-    } catch (error) {
-      throw new BadRequestException('خطا در ارسال رمز یکبار‌مصرف', error);
-    }
-  }
-
-  protected async createOtp({ recipient, otp, otp_expiration, type }: CreateOtpDto) {
-    try {
-      const existingOtp = await this.otpRepository.findOne({
-        where: [{ recipient }],
-      });
-
-      if (existingOtp) {
-        await this.otpRepository.update(existingOtp.id, {
-          recipient,
-          otp,
-          otp_expiration,
-          type,
-        });
-      } else {
-        const otpRecord = this.otpRepository.create({
-          recipient,
-          otp,
-          otp_expiration,
-          type,
-        });
-        await this.otpRepository.save(otpRecord);
       }
     } catch (error) {
       throw new BadRequestException('خطا در ارسال رمز یکبار‌مصرف', error);
@@ -104,5 +66,49 @@ export class OtpService {
   protected async generateExpireTime() {
     const now = new Date();
     return new Date(now.getTime() + 2 * 60 * 1000).toISOString();
+  }
+
+  private async createOtp({ recipient, otp, otp_expiration, type }: CreateOtpDto) {
+    try {
+      const existingOtp = await this.otpRepository.findOne({
+        where: [{ recipient }],
+      });
+
+      if (existingOtp) {
+        await this.otpRepository.update(existingOtp.id, {
+          recipient,
+          otp,
+          otp_expiration,
+          type,
+        });
+      } else {
+        const otpRecord = this.otpRepository.create({
+          recipient,
+          otp,
+          otp_expiration,
+          type,
+        });
+        await this.otpRepository.save(otpRecord);
+      }
+    } catch (error) {
+      throw new BadRequestException('خطا در ارسال رمز یکبار‌مصرف', error);
+    }
+  }
+
+  private async sendEmailOtp(email: string) {
+    const otp = await this.generateOTP();
+    const eOtp = await this.encryptionService.hash(otp);
+    const otp_expiration = await this.generateExpireTime();
+    await this.mailService.sendOtp(email, otp);
+    await this.createOtp({ otp: eOtp, recipient: email, otp_expiration, type: 'email' });
+    return { message: 'رمز یکبار مصرف ارسال شد.' };
+  }
+  private async sendSMSOtp(phone_number: string) {
+    const otp = await this.generateOTP();
+    const eOtp = await this.encryptionService.hash(otp);
+    const otp_expiration = await this.generateExpireTime();
+    await this.smsService.sendOtp(phone_number, otp);
+    await this.createOtp({ otp: eOtp, recipient: phone_number, otp_expiration, type: 'sms' });
+    return { message: 'رمز یکبار مصرف ارسال شد.' };
   }
 }

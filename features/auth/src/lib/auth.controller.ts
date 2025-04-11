@@ -140,7 +140,6 @@ export class AuthController {
   async deleteAccount(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user_id = req['user']['sub'];
     await this.cookieService.deleteResponseTokenCookies(res);
-    await this.authService.deleteAccount(user_id);
-    return { message: 'حساب کاربری حذف شد' };
+    return this.authService.deleteAccount(user_id);
   }
 }

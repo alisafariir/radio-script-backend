@@ -26,23 +26,36 @@ export class CookieService {
       maxAge: this.maxAge,
       expires: this.expires,
       httpOnly: true,
-      sameSite: 'none', // Required for cross-site
-      secure: true, // ✅ MUST be true if SameSite is 'none'
     };
 
-    if (isProduction && domain) {
+    if (isProduction) {
+      cookieOptions.secure = true; // 🔐 only use Secure in production
+      cookieOptions.sameSite = 'none';
+      if (!domain) {
+        throw new Error('APP_DOMAIN_WILDCARD is not defined in the environment');
+      }
       cookieOptions.domain = domain;
+    } else {
+      cookieOptions.secure = false; // ❌ Allow HTTP for localhost
+      cookieOptions.sameSite = 'lax'; // ✅ Prevent rejection by browser
+      // ⚠ Do not set domain in dev or localhost will reject the cookie
     }
 
     return cookieOptions;
   }
+
   async setResponseTokenCookies(res: Response, access_token: string, refresh_token: string) {
     const cookieOptions = this.setCookieOptions();
     res.cookie('access_token', access_token, cookieOptions);
     res.cookie('refresh_token', refresh_token, cookieOptions);
   }
+
   async deleteResponseTokenCookies(res: Response) {
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+    const deleteOptions: CookieOptions = {
+      path: '/',
+      httpOnly: true,
+    };
+    res.clearCookie('access_token', deleteOptions);
+    res.clearCookie('refresh_token', deleteOptions);
   }
 }

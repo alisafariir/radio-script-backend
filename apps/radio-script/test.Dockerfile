@@ -42,4 +42,4 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Run the compiled app
-CMD ["node" ,"NODE_ENV=test", "dist/main.js"]
+CMD ["node", "dist/main.js"]

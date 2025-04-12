@@ -26,10 +26,12 @@ export class CookieService {
       priority: 'high',
       secure: false,
       path: '/',
-      domain,
       maxAge: this.maxAge,
       expires: this.expires,
     };
+    if (isProduction) {
+      cookieOptions.domain = domain;
+    }
     if (isProduction || isTest) {
       cookieOptions.secure = true;
       cookieOptions.httpOnly = true;

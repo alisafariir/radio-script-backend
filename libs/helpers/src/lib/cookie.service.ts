@@ -17,6 +17,7 @@ export class CookieService {
 
   setCookieOptions() {
     const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const isTest = this.configService.get<string>('NODE_ENV') === 'test';
     const domain = this.configService.get<string>('APP_DOMAIN_WILDCARD');
     if (!domain) {
       throw new Error('APP_DOMAIN_WILDCARD is not defined in the environment');
@@ -29,11 +30,12 @@ export class CookieService {
       maxAge: this.maxAge,
       expires: this.expires,
     };
-    if (isProduction) {
+    if (isProduction || isTest) {
       cookieOptions.secure = true;
       cookieOptions.httpOnly = true;
       cookieOptions.sameSite = 'none';
     }
+
     return cookieOptions;
   }
   async setResponseTokenCookies(res: Response, access_token: string, refresh_token: string) {

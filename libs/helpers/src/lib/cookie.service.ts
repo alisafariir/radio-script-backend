@@ -18,33 +18,24 @@ export class CookieService {
   setCookieOptions(): CookieOptions {
     const env = this.configService.get<string>('NODE_ENV') ?? 'development';
     const isProduction = env === 'production';
-    const domain = this.configService.get<string>('APP_DOMAIN_WILDCARD'); // e.g., .radioscript.live
+    const domain = this.configService.get<string>('APP_DOMAIN_WILDCARD');
 
     const cookieOptions: CookieOptions = {
       priority: 'high',
       path: '/',
       maxAge: this.maxAge,
       expires: this.expires,
-      httpOnly: true, // Always HttpOnly
+      httpOnly: true,
+      sameSite: 'none', // Required for cross-site
+      secure: true, // ✅ MUST be true if SameSite is 'none'
     };
 
-    // Allow cookies for cross-origin (localhost to .radioscript.live)
-    if (isProduction) {
-      cookieOptions.secure = true;
-      cookieOptions.sameSite = 'none';
-      if (!domain) {
-        throw new Error('APP_DOMAIN_WILDCARD is not defined in the environment');
-      }
-      cookieOptions.domain = domain; // e.g., .radioscript.live
-    } else {
-      cookieOptions.secure = false; // Allow HTTP for localhost
-      cookieOptions.sameSite = 'none'; // Required for cross-origin
-      // ⚠️ Don't set domain in dev or localhost will reject cookie
+    if (isProduction && domain) {
+      cookieOptions.domain = domain;
     }
 
     return cookieOptions;
   }
-
   async setResponseTokenCookies(res: Response, access_token: string, refresh_token: string) {
     const cookieOptions = this.setCookieOptions();
     res.cookie('access_token', access_token, cookieOptions);

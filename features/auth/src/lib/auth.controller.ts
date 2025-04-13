@@ -1,5 +1,5 @@
 import { avatarMulterOptions } from '@/constants';
-import { ChangePasswordDto, ForgotPasswordDto, GoogleOneTapDto, IdentityDto, LoginDto, LoginOtpDto, OtpDto, RegisterDto, UpdateProfileDto } from '@/dtos';
+import { ChangePasswordDto, ForgotPasswordDto, GoogleOneTapDto, IdentityDto, LoginDto, LoginOtpDto, OtpDto, RegisterDto, UpdateEmailDto, UpdatePhoneNumberDto, UpdateProfileDto } from '@/dtos';
 import { JwtAuthGuard, RefreshTokenGuard } from '@/guards';
 import { CookieService } from '@/helpers';
 import { DeviceInterceptor } from '@/interceptors';
@@ -75,11 +75,6 @@ export class AuthController {
     return res.redirect(data.url);
   }
 
-  @Post('send-otp')
-  async sendOtp(@Body() otpDto: OtpDto) {
-    return this.authService.sendOtp(otpDto);
-  }
-
   @Post('forgot-password')
   async forgotPassword(@Req() req: Request, @Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto);
@@ -88,6 +83,11 @@ export class AuthController {
   @Patch('change-password')
   async changePassword(@Body() changePasswordDto: ChangePasswordDto, @Req() request: Request) {
     return this.authService.changePassword(changePasswordDto, request['deviceInfo']);
+  }
+
+  @Post('send-otp')
+  async sendOtp(@Body() otpDto: OtpDto) {
+    return this.authService.sendOtp(otpDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -110,6 +110,26 @@ export class AuthController {
   async updateAvatar(@Req() req: Request, @UploadedFile() avatar: Express.Multer.File) {
     const user_id = req['user']['sub'];
     return this.authService.updateAvatar(user_id, avatar);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('send-verification-otp')
+  async sendVerificationOtp(@Body() otpDto: OtpDto) {
+    return this.authService.sendVerificationOtp(otpDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('email')
+  async updateEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
+    const user_id = req['user']['sub'];
+    return this.authService.updateEmail(user_id, updateEmailDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('phone-number')
+  async updatePhoneNumber(@Req() req: Request, @Body() updatePhoneNumberDto: UpdatePhoneNumberDto) {
+    const user_id = req['user']['sub'];
+    return this.authService.updatePhoneNumber(user_id, updatePhoneNumberDto);
   }
 
   @UseGuards(JwtAuthGuard)

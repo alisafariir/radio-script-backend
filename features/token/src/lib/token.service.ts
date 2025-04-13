@@ -115,16 +115,16 @@ export class TokenService {
       request['user'] = payload;
       return true;
     } catch {
-      throw new UnauthorizedException('توکن نامعتبر است.');
+      throw new UnauthorizedException('توکن منقضی شده است.');
     }
   }
 
   async generateTokens(user: User, deviceInfo: DeviceInfo) {
     const payload = { sub: user.id };
-    const expireInAccessToken = moment().add(1, 'hours').toDate();
+    const expireInAccessToken = moment().add(1, 'minute').toDate();
     const expireInRefreshToken = moment().add(7, 'days').toDate();
     const access_token = this.jwtService.sign(payload, {
-      expiresIn: '1h',
+      expiresIn: '1m',
       secret: this.jwtSecretKey,
     });
     const refresh_token = this.jwtService.sign(payload, {

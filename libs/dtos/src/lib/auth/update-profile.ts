@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsEmail()
@@ -27,4 +27,26 @@ export class UpdateProfileDto {
   })
   @IsOptional()
   bio: string;
+}
+
+export class UpdateEmailDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(4)
+  otp: string;
+}
+
+export class UpdatePhoneNumberDto {
+  @IsPhoneNumber('IR')
+  @IsOptional()
+  phone_number?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(4)
+  otp: string;
 }

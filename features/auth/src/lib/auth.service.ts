@@ -1,4 +1,4 @@
-import { ChangePasswordDto, ForgotPasswordDto, GoogleOneTapDto, IdentityDto, LoginDto, LoginOtpDto, OtpDto, RegisterDto, UpdateProfileDto } from '@/dtos';
+import { ChangePasswordDto, ForgotPasswordDto, GoogleOneTapDto, IdentityDto, LoginDto, LoginOtpDto, OtpDto, RegisterDto, UpdateEmailDto, UpdatePhoneNumberDto, UpdateProfileDto } from '@/dtos';
 import { User } from '@/entities';
 import { EncryptionService, S3Service } from '@/helpers';
 import { DeviceInfo } from '@/interfaces';
@@ -261,6 +261,43 @@ export class AuthService {
     }
 
     await this.userRepository.update(user_id, updateProfileDto);
+    const profile = await this.getProfile(user_id);
+    return { message: 'پروفایل بروز شد.', ...profile };
+  }
+
+  async sendVerificationOtp({ email, phone_number }: OtpDto) {
+    const recipient = email ? email : phone_number;
+
+    await this.otpService.sendOtp(recipient);
+
+    return { message: 'کد تایید ارسال شد.' };
+  }
+
+  async updateEmail(user_id: string, { otp, email }: UpdateEmailDto) {
+    await this.otpService.verifyOtp(otp, email);
+
+    const existingEmail = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (existingEmail) {
+      throw new ConflictException('کاربری با این ایمیل وجود دارد، با پشتیبانی تماس بگیرید.');
+    }
+    await this.userRepository.update(user_id, { email });
+    const profile = await this.getProfile(user_id);
+    return { message: 'پروفایل بروز شد.', ...profile };
+  }
+
+  async updatePhoneNumber(user_id: string, { otp, phone_number }: UpdatePhoneNumberDto) {
+    await this.otpService.verifyOtp(otp, phone_number);
+
+    const existingPhoneNumber = await this.userRepository.findOne({
+      where: { phone_number },
+    });
+
+    if (existingPhoneNumber) {
+      throw new ConflictException('کاربری با این شماره همراه وجود دارد، با پشتیبانی تماس بگیرید.');
+    }
+    await this.userRepository.update(user_id, { phone_number });
     const profile = await this.getProfile(user_id);
     return { message: 'پروفایل بروز شد.', ...profile };
   }

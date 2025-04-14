@@ -14,8 +14,8 @@ import { MailService } from './mail.service';
       inject: [ConfigService], // Inject ConfigService
       useFactory: (configService: ConfigService) => ({
         transport: {
-          host: configService.get<string>('SMTP_HOST', 'smtp.gmail.com'), // Fallback to 'smtp.gmail.com' if not provided
-          port: configService.get<number>('SMTP_PORT', 587), // Fallback to 465 if not provided
+          host: configService.get<string>('SMTP_HOST'), // Fallback to 'smtp.gmail.com' if not provided
+          port: configService.get<number>('SMTP_PORT'), // Fallback to 465 if not provided
           secure: false, // true for 465, false for other ports
           auth: {
             user: configService.get<string>('GMAIL_USER'), // your Gmail address

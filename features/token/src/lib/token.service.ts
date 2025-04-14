@@ -121,10 +121,10 @@ export class TokenService {
 
   async generateTokens(user: User, deviceInfo: DeviceInfo) {
     const payload = { sub: user.id };
-    const expireInAccessToken = moment().add(1, 'minute').toDate();
+    const expireInAccessToken = moment().add(1, 'hours').toDate();
     const expireInRefreshToken = moment().add(7, 'days').toDate();
     const access_token = this.jwtService.sign(payload, {
-      expiresIn: '1m',
+      expiresIn: '1h',
       secret: this.jwtSecretKey,
     });
     const refresh_token = this.jwtService.sign(payload, {

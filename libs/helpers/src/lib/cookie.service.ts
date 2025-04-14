@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CookieOptions, Response } from 'express';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CookieOptions, Response } from "express";
 
 @Injectable()
 export class CookieService {
@@ -16,13 +16,13 @@ export class CookieService {
   }
 
   setCookieOptions(): CookieOptions {
-    const env = this.configService.get<string>('NODE_ENV') ?? 'development';
-    const isProduction = env === 'production';
-    const domain = this.configService.get<string>('APP_DOMAIN_WILDCARD');
+    const env = this.configService.get<string>("NODE_ENV") ?? "development";
+    const isProduction = env === "production";
+    const domain = this.configService.get<string>("APP_DOMAIN_WILDCARD");
 
     const cookieOptions: CookieOptions = {
-      priority: 'high',
-      path: '/',
+      priority: "high",
+      path: "/",
       maxAge: this.maxAge,
       expires: this.expires,
       httpOnly: true,
@@ -30,32 +30,35 @@ export class CookieService {
 
     if (isProduction) {
       cookieOptions.secure = true; // 🔐 only use Secure in production
-      cookieOptions.sameSite = 'none';
+      cookieOptions.sameSite = "none";
       if (!domain) {
-        throw new Error('APP_DOMAIN_WILDCARD is not defined in the environment');
+        throw new Error(
+          "APP_DOMAIN_WILDCARD is not defined in the environment"
+        );
       }
       cookieOptions.domain = domain;
     } else {
       cookieOptions.secure = false; // ❌ Allow HTTP for localhost
-      cookieOptions.sameSite = 'lax'; // ✅ Prevent rejection by browser
+      cookieOptions.sameSite = "lax"; // ✅ Prevent rejection by browser
       // ⚠ Do not set domain in dev or localhost will reject the cookie
     }
 
     return cookieOptions;
   }
 
-  async setResponseTokenCookies(res: Response, access_token: string, refresh_token: string) {
+  async setResponseTokenCookies(
+    res: Response,
+    access_token: string,
+    refresh_token: string
+  ) {
     const cookieOptions = this.setCookieOptions();
-    res.cookie('access_token', access_token, cookieOptions);
-    res.cookie('refresh_token', refresh_token, cookieOptions);
+    res.cookie("access_token", access_token, cookieOptions);
+    res.cookie("refresh_token", refresh_token, cookieOptions);
   }
 
   async deleteResponseTokenCookies(res: Response) {
-    const deleteOptions: CookieOptions = {
-      path: '/',
-      httpOnly: true,
-    };
-    res.clearCookie('access_token', deleteOptions);
-    res.clearCookie('refresh_token', deleteOptions);
+    const deleteOptions: CookieOptions = this.setCookieOptions();
+    res.clearCookie("access_token", deleteOptions);
+    res.clearCookie("refresh_token", deleteOptions);
   }
 }

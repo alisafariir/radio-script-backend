@@ -4,6 +4,7 @@
  */
 
 import { GlobalExceptionFilter } from '@/filters';
+import { TranslateInterceptor } from '@/interceptors';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -22,6 +23,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  app.useGlobalInterceptors(new TranslateInterceptor());
 
   app.use(cookieParser());
 

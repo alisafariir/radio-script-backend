@@ -35,8 +35,8 @@
       "@/sms": ["features/sms/src/index.ts"],
       "@/strategies": ["libs/strategies/src/index.ts"],
       "@/token": ["features/token/src/index.ts"],
-      "@/user": ["features/user/src/index.ts"],
-      "@/types": ["libs/types/src/index.ts"]
+      "@/types": ["libs/types/src/index.ts"],
+      "@/user": ["features/user/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

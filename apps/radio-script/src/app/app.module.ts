@@ -11,6 +11,8 @@ import { UserModule } from '@/user';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { I18nModule } from 'nestjs-i18n';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -31,6 +33,13 @@ import { AppService } from './app.service';
         limit: 30,
       },
     ]),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en', // Default language if the user's language is not available
+      loaderOptions: {
+        path: join(__dirname, '/assets/i18n'), // Path to your translation files
+        watch: true, // Watch files for changes
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [

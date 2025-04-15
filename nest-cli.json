@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "translate": {
+      "type": "library",
+      "root": "libs/translate/translate",
+      "entryFile": "index",
+      "sourceRoot": "libs/translate/translate/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/translate/translate/tsconfig.lib.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true
+  }
+}

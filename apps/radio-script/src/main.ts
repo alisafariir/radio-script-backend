@@ -9,7 +9,9 @@ import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 import { AppModule } from './app/app.module';
+
 async function bootstrap() {
   const globalPrefix = 'api';
   const defaultVersion = '1';
@@ -18,11 +20,22 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const allowedOrigins = configService.get<string>('ALLOW_ORIGINS').split(',');
+  const allowedOrigins = configService.getOrThrow<string>('ALLOW_ORIGINS').split(',');
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe(),
+    new I18nValidationPipe({
+      transform: true,
+      whitelist: true,
+    })
+  );
 
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(
+    new GlobalExceptionFilter(),
+    new I18nValidationExceptionFilter({
+      detailedErrors: false,
+    })
+  );
 
   app.useGlobalInterceptors(new TranslateInterceptor());
 

@@ -5,7 +5,8 @@
   "scripts": {
     "start:test": "npx nx run radio-script:serve --configuration=test",
     "start": "npx nx run radio-script:serve --configuration=development --watch=true",
-    "start:debug": "npx nx run radio-script:serve --inspect=true --watch=true --configuration=development"
+    "start:debug": "npx nx run radio-script:serve --inspect=true --watch=true --configuration=development",
+    "postbuild": "cp -r apps/radio-script/src/assets/i18n dist/apps/radio-script/assets"
   },
   "private": true,
   "dependencies": {

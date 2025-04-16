@@ -7,13 +7,7 @@ export class EncryptionService {
   private readonly secretKey;
 
   constructor(private configService: ConfigService) {
-    this.secretKey = this.configService.get<string>('ENCRYPT_SECRET_KEY');
-
-    if (!this.secretKey) {
-      throw new Error(
-        'ENCRYPT_SECRET_KEY is not defined in the environment variables.'
-      );
-    }
+    this.secretKey = this.configService.getOrThrow<string>('ENCRYPT_SECRET_KEY');
   }
 
   async hash(text: string) {

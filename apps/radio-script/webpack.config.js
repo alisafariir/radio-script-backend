@@ -23,6 +23,10 @@ module.exports = {
           from: '../../features/mail/src/lib/templates',
           to: 'templates',
         },
+        {
+          from: 'src/i18n',
+          to: 'i18n',
+        },
       ],
     }),
   ],

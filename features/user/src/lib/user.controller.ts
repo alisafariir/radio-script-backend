@@ -44,7 +44,7 @@ export class UserController {
 
   private mapToUserResponseDto(user: User): UserResponseDto {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userData } = user; // پسورد رو از نتیجه حذف کن
+    const { password, ...userData } = user;
     return userData;
   }
 }

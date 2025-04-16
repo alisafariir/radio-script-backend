@@ -11,7 +11,6 @@ export class DeviceInterceptor implements NestInterceptor {
     const userAgent = request.headers['user-agent'] || '';
     const deviceInfo = useragent.parse(userAgent);
 
-    // افزودن اطلاعات دستگاه به Request
     request.deviceInfo = {
       device_type: this.getDeviceType(deviceInfo),
       os: deviceInfo.os,
@@ -30,7 +29,6 @@ export class DeviceInterceptor implements NestInterceptor {
   }
 
   private getClientIp(request: Request): string {
-    // اگر از پشت پروکسی (مثل Nginx) استفاده می‌کنید، از هدرهای X-Forwarded-For استفاده کنید
     return request.ip || request.connection.remoteAddress;
   }
 }

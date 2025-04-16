@@ -8,16 +8,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refresh-token') {
   constructor(private readonly configService: ConfigService) {
-    if (!configService.get<string>('JWT_SECRET_KEY')) {
-      throw new Error('JWT_SECRET_KEY is not defined in the environment');
-    }
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           return request?.cookies?.refresh_token;
         },
       ]),
-      secretOrKey: configService.get<string>('JWT_SECRET_KEY', ''),
+      secretOrKey: configService.getOrThrow<string>('JWT_SECRET_KEY', ''),
       passReqToCallback: true,
     });
   }

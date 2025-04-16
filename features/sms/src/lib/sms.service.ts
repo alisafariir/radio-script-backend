@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -8,21 +8,9 @@ export class SmsService {
   smsToken: string;
   smsBodyId: string;
   constructor(private configService: ConfigService, private httpService: HttpService) {
-    this.smsEndpoint = this.configService.get<string>('SMS_SERVICE_ENDPOINT');
-    this.smsToken = this.configService.get<string>('SMS_SERVICE_TOKEN');
-    this.smsBodyId = this.configService.get<string>('SMS_SERVICE_BODY_ID');
-
-    if (!this.smsEndpoint) {
-      throw new InternalServerErrorException('SMS_SERVICE_ENDPOINT not found in environment variables');
-    }
-
-    if (!this.smsToken) {
-      throw new InternalServerErrorException('SMS_SERVICE_TOKEN not found in environment variables');
-    }
-
-    if (!this.smsBodyId) {
-      throw new InternalServerErrorException('SMS_SERVICE_BODY_ID not found in environment variables');
-    }
+    this.smsEndpoint = this.configService.getOrThrow<string>('SMS_SERVICE_ENDPOINT');
+    this.smsToken = this.configService.getOrThrow<string>('SMS_SERVICE_TOKEN');
+    this.smsBodyId = this.configService.getOrThrow<string>('SMS_SERVICE_BODY_ID');
   }
 
   async sendOtp(phone_number: string, otp: string) {

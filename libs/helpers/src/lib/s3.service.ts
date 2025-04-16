@@ -11,15 +11,15 @@ export class S3Service {
   private readonly endpoint: string;
 
   constructor(configService: ConfigService) {
-    this.endpoint = configService.get<string>('S3_ENDPOINT');
-    this.bucketName = configService.get<string>('S3_BUCKET_NAME');
+    this.endpoint = configService.getOrThrow<string>('S3_ENDPOINT');
+    this.bucketName = configService.getOrThrow<string>('S3_BUCKET_NAME');
 
     this.s3Client = new S3Client({
       endpoint: this.endpoint,
-      region: configService.get<string>('S3_REGION'),
+      region: configService.getOrThrow<string>('S3_REGION'),
       credentials: {
-        accessKeyId: configService.get<string>('S3_ACCESS_KEY_ID'),
-        secretAccessKey: configService.get<string>('S3_SECRET_ACCESS_KEY'),
+        accessKeyId: configService.getOrThrow<string>('S3_ACCESS_KEY_ID'),
+        secretAccessKey: configService.getOrThrow<string>('S3_SECRET_ACCESS_KEY'),
       },
       forcePathStyle: true,
       tls: this.endpoint.startsWith('https://'),

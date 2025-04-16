@@ -9,6 +9,7 @@ import { BadRequestException, ConflictException, HttpException, Injectable, NotF
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
+import { I18nService } from 'nestjs-i18n';
 import { extname } from 'path';
 import { Repository } from 'typeorm';
 @Injectable()
@@ -20,7 +21,8 @@ export class AuthService {
     private readonly s3Service: S3Service,
     private readonly encryptionService: EncryptionService,
     private tokenService: TokenService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private i18nService: I18nService
   ) {}
 
   async identityVerification({ email, phone_number }: IdentityDto) {
@@ -50,7 +52,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('حساب کاربری از قبل وجود دارد');
+      throw new ConflictException(this.i18nService.t('error.USER_EXIST'));
     }
 
     if (existingUser?.deleted_at) {
@@ -82,15 +84,15 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException('حساب کاربری یافت نشد.');
+      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
     }
     if (existingUser.created_by === 'social_login') {
-      throw new BadRequestException('رمز عبور صحیح نیست، شما قبلا با ورود از طریق شبکه های اجتماعی ثبت نام کرده اید و برای حساب کاربری خود رمز عبور قرار نداده اید.');
+      throw new BadRequestException(this.i18nService.t('error.CREATED_BY_SOCIAL_LOGIN'));
     }
     const isValidPassword = await this.encryptionService.compare(password, existingUser.password);
 
     if (!password || !isValidPassword) {
-      throw new BadRequestException('رمز عبور صحیح نمی‌باشد.');
+      throw new BadRequestException(this.i18nService.t('error.INVALID_PASSWORD'));
     }
 
     const token = await this.createToken(existingUser, deviceInfo);
@@ -106,12 +108,12 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new NotFoundException('حساب کاربری یافت نشد.');
+      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
     }
 
     await this.otpService.sendOtp(recipient);
 
-    return { message: 'رمز یکبار‌مصرف ارسال شد.' };
+    return { message: this.i18nService.t('info.OTP_SENT') };
   }
 
   async loginOtp({ email, phone_number, otp }: LoginOtpDto, deviceInfo: DeviceInfo) {
@@ -121,7 +123,7 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new NotFoundException('حساب کاربری یافت نشد.');
+      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
     }
 
     await this.otpService.verifyOtp(otp, recipient);
@@ -205,12 +207,12 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException('حساب کاربری یافت نشد.');
+      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
     }
 
     await this.otpService.sendOtp(recipient);
 
-    return { message: 'رمز یکبار‌مصرف ارسال شد.' };
+    return { message: this.i18nService.t('info.OTP_SENT') };
   }
 
   async changePassword({ email, phone_number, otp, password }: ChangePasswordDto, deviceInfo: DeviceInfo) {
@@ -220,7 +222,7 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException('حساب کاربری یافت نشد.');
+      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
     }
 
     await this.otpService.verifyOtp(otp, recipient);
@@ -247,7 +249,7 @@ export class AuthService {
         where: { phone_number: updateProfileDto.phone_number },
       });
       if (existingPhoneNumber) {
-        throw new ConflictException('کاربری با این شماره همراه وجود دارد، با پشتیبانی تماس بگیرید.');
+        throw new ConflictException(this.i18nService.t('error.USER_PHONE_EXIST'));
       }
     }
 
@@ -256,13 +258,13 @@ export class AuthService {
         where: { email: updateProfileDto.email },
       });
       if (existingEmail) {
-        throw new ConflictException('کاربری با این ایمیل وجود دارد، با پشتیبانی تماس بگیرید.');
+        throw new ConflictException(this.i18nService.t('error.USER_EMAIL_EXIST'));
       }
     }
 
     await this.userRepository.update(user_id, updateProfileDto);
     const profile = await this.getProfile(user_id);
-    return { message: 'پروفایل بروز شد.', ...profile };
+    return { message: this.i18nService.t('info.PROFILE_UPDATED'), ...profile };
   }
 
   async sendVerificationOtp({ email, phone_number }: OtpDto) {
@@ -270,7 +272,7 @@ export class AuthService {
 
     await this.otpService.sendOtp(recipient);
 
-    return { message: 'کد تایید ارسال شد.' };
+    return { message: this.i18nService.t('info.CONFIRM_CODE_SENT') };
   }
 
   async updateEmail(user_id: string, { otp, email }: UpdateEmailDto) {
@@ -280,11 +282,11 @@ export class AuthService {
       where: { email },
     });
     if (existingEmail) {
-      throw new ConflictException('کاربری با این ایمیل وجود دارد، با پشتیبانی تماس بگیرید.');
+      throw new ConflictException(this.i18nService.t('error.USER_EMAIL_EXIST'));
     }
     await this.userRepository.update(user_id, { email });
     const profile = await this.getProfile(user_id);
-    return { message: 'پروفایل بروز شد.', ...profile };
+    return { message: this.i18nService.t('info.PROFILE_UPDATED'), ...profile };
   }
 
   async updatePhoneNumber(user_id: string, { otp, phone_number }: UpdatePhoneNumberDto) {
@@ -295,11 +297,11 @@ export class AuthService {
     });
 
     if (existingPhoneNumber) {
-      throw new ConflictException('کاربری با این شماره همراه وجود دارد، با پشتیبانی تماس بگیرید.');
+      throw new ConflictException(this.i18nService.t('error.USER_PHONE_EXIST'));
     }
     await this.userRepository.update(user_id, { phone_number });
     const profile = await this.getProfile(user_id);
-    return { message: 'پروفایل بروز شد.', ...profile };
+    return { message: this.i18nService.t('info.PROFILE_UPDATED'), ...profile };
   }
 
   async updateAvatar(user_id: string, file: Express.Multer.File) {
@@ -316,14 +318,14 @@ export class AuthService {
     }
     const profile = await this.getProfile(user_id);
 
-    return { message: 'تصویر پروفایل بروز شد.', ...profile };
+    return { message: this.i18nService.t('info.PROFILE_AVATAR_UPDATED'), ...profile };
   }
 
   async removeAvatar(user_id: string) {
     const user = await this.userRepository.findOne({ where: { id: user_id } });
     await this.s3Service.deleteDirectory(`avatars/${user.id}`);
     await this.userRepository.update(user.id, { avatar_url: '' });
-    return { message: 'تصویر پروفایل حذف شد.' };
+    return { message: this.i18nService.t('info.PROFILE_AVATAR_DELETED') };
   }
 
   async setAvatar(user_id: string, file: Express.Multer.File) {
@@ -340,7 +342,6 @@ export class AuthService {
     } catch (error) {
       throw new HttpException(error.message, 400);
     }
-    return { message: 'تصویر پروفایل بروز شد.' };
   }
 
   async createToken(user: User, deviceInfo: DeviceInfo) {
@@ -348,7 +349,7 @@ export class AuthService {
   }
 
   async refresh_token(user: any, deviceInfo: DeviceInfo) {
-    return await this.tokenService.refresh_token(user.refresh_token, deviceInfo);
+    return await this.tokenService.refreshToken(user.refresh_token, deviceInfo);
   }
 
   async logout(request: Request) {
@@ -357,19 +358,19 @@ export class AuthService {
 
   async deleteAccount(user_id: string) {
     const user = await this.userRepository.findOne({ where: { id: user_id } });
-    if (!user) throw new NotFoundException('کاربر یافت نشد.');
+    if (!user) throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
 
     if (user.role !== 'user') {
-      throw new BadRequestException('امکان حذف حساب کاربری برای نقش شما وجود ندارد. برای حذف حساب کاربری با پشتیبانی تماس بگیرید.');
+      throw new BadRequestException(this.i18nService.t('error.USER_CAN_NOT_DELETED_BY_ROLE'));
     }
 
     await this.tokenService.deleteAllTokensByUserId(user.id);
     await this.userRepository.delete(user.id);
-    return { message: 'حساب کاربری حذف شد' };
+    return { message: this.i18nService.t('info.ACCOUNT_DELETED') };
   }
 
   private createSocialCallbackUrl(access_token: string, refresh_token: string, provider: SocialLoginProvider) {
-    const redirectUrl = this.configService.get<string>('SOCIAL_AUTH_FRONT_END_CALLBACK_URL');
+    const redirectUrl = this.configService.getOrThrow<string>('SOCIAL_AUTH_FRONT_END_CALLBACK_URL');
     return `${redirectUrl}?access_token=${access_token}&refresh_token=${refresh_token}&provider=${provider}`;
   }
 }

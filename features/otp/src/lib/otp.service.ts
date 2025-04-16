@@ -5,6 +5,7 @@ import { MailService } from '@/mail';
 import { SmsService } from '@/sms';
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { I18nService } from 'nestjs-i18n';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -14,12 +15,13 @@ export class OtpService {
     private readonly otpRepository: Repository<Otp>,
     private encryptionService: EncryptionService,
     private smsService: SmsService,
-    private mailService: MailService
+    private mailService: MailService,
+    private i18nService: I18nService
   ) {}
 
   async sendOtp(recipient?: string) {
     if (!recipient) {
-      throw new BadRequestException('دریافت کننده الزامی است.');
+      throw new BadRequestException(this.i18nService.t('error.OTP_RECIPIENT_REQUIRED'));
     }
     try {
       switch (detectInputType(recipient)) {
@@ -30,10 +32,10 @@ export class OtpService {
           return await this.sendSMSOtp(recipient);
 
         case 'invalid':
-          throw new BadRequestException('مقدار دریافت کننده صحیح نیست.');
+          throw new BadRequestException(this.i18nService.t('error.OTP_RECIPIENT_NOT_VALID'));
       }
     } catch (error) {
-      throw new BadRequestException('خطا در ارسال رمز یکبار‌مصرف', error);
+      throw new BadRequestException(this.i18nService.t('error.OTP_SEND_FAILED'), error);
     }
   }
 
@@ -43,17 +45,17 @@ export class OtpService {
     });
 
     if (!foundedOtp) {
-      throw new HttpException('کد یکبار مصرف صحیح نیست', 410);
+      throw new HttpException(this.i18nService.t('error.OTP_NOT_VALID'), 410);
     }
 
     const isValidOtp = await this.encryptionService.compare(otp, foundedOtp.otp);
-    if (!isValidOtp) throw new HttpException('کد یکبار مصرف صحیح نیست', 410);
+    if (!isValidOtp) throw new HttpException(this.i18nService.t('error.OTP_NOT_VALID'), 410);
 
     const currentTime = new Date().getTime();
     const otp_expiration = new Date(foundedOtp.otp_expiration).getTime();
 
     if (currentTime >= otp_expiration) {
-      throw new HttpException('کد یکبار مصرف منقضی شده است', 410);
+      throw new HttpException(this.i18nService.t('error.OTP_EXPIRED'), 410);
     }
 
     await this.otpRepository.delete(foundedOtp.id);
@@ -91,7 +93,7 @@ export class OtpService {
         await this.otpRepository.save(otpRecord);
       }
     } catch (error) {
-      throw new BadRequestException('خطا در ارسال رمز یکبار‌مصرف', error);
+      throw new BadRequestException(this.i18nService.t('error.OTP_SEND_FAILED'), error);
     }
   }
 
@@ -101,7 +103,7 @@ export class OtpService {
     const otp_expiration = await this.generateExpireTime();
     await this.mailService.sendOtp(email, otp);
     await this.createOtp({ otp: eOtp, recipient: email, otp_expiration, type: 'email' });
-    return { message: 'رمز یکبار مصرف ارسال شد.' };
+    return { message: this.i18nService.t('info.OTP_SENT') };
   }
   private async sendSMSOtp(phone_number: string) {
     const otp = await this.generateOTP();
@@ -109,6 +111,6 @@ export class OtpService {
     const otp_expiration = await this.generateExpireTime();
     await this.smsService.sendOtp(phone_number, otp);
     await this.createOtp({ otp: eOtp, recipient: phone_number, otp_expiration, type: 'sms' });
-    return { message: 'رمز یکبار مصرف ارسال شد.' };
+    return { message: this.i18nService.t('info.OTP_SENT') };
   }
 }

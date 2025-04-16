@@ -11,7 +11,7 @@ import { UserModule } from '@/user';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { I18nModule } from 'nestjs-i18n';
+import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -34,11 +34,12 @@ import { AppService } from './app.service';
       },
     ]),
     I18nModule.forRoot({
-      fallbackLanguage: 'en', // Default language if the user's language is not available
+      fallbackLanguage: 'en',
       loaderOptions: {
-        path: join(__dirname, '/assets/i18n'), // Path to your translation files
-        watch: true, // Watch files for changes
+        path: join(__dirname, '/i18n/'),
+        watch: true,
       },
+      resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver, new HeaderResolver(['x-lang'])],
     }),
   ],
   controllers: [AppController],

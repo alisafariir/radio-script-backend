@@ -5,13 +5,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { I18nService } from 'nestjs-i18n';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private configService: ConfigService,
-    private encryptionService: EncryptionService
+    private encryptionService: EncryptionService,
+    private readonly i18n: I18nService
   ) {}
 
   async createUserByEmail(createUserDto: CreateUserByEmailDto) {
@@ -56,7 +59,7 @@ export class UserService {
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException('کاربر یافت نشد');
+      throw new NotFoundException(this.i18n.t('error.USER_NOT_FOUND'));
     }
     return user;
   }

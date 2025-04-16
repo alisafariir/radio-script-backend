@@ -6,19 +6,10 @@ import { Strategy } from 'passport-github2';
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(private configService: ConfigService) {
-    if (!configService.get<string>('GH_CLIENT_ID')) {
-      throw new Error('GH_CLIENT_ID is not defined in the environment');
-    }
-    if (!configService.get<string>('GH_CLIENT_SECRET')) {
-      throw new Error('GH_CLIENT_SECRET is not defined in the environment');
-    }
-    if (!configService.get<string>('GH_AUTH_CALLBACK_URL')) {
-      throw new Error('GH_AUTH_CALLBACK_URL is not defined in the environment');
-    }
     super({
-      clientID: configService.get<string>('GH_CLIENT_ID', ''), // Provide a default value
-      clientSecret: configService.get<string>('GH_CLIENT_SECRET', ''), // Provide a default value
-      callbackURL: configService.get<string>('GH_AUTH_CALLBACK_URL', ''), // Provide a default value
+      clientID: configService.getOrThrow<string>('GH_CLIENT_ID', ''), // Provide a default value
+      clientSecret: configService.getOrThrow<string>('GH_CLIENT_SECRET', ''), // Provide a default value
+      callbackURL: configService.getOrThrow<string>('GH_AUTH_CALLBACK_URL', ''), // Provide a default value
       scope: ['user:email'],
     });
   }

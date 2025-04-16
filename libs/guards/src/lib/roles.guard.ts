@@ -4,6 +4,7 @@ import { UserRole } from '@/enums';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
+import { I18nService } from 'nestjs-i18n';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,19 +12,17 @@ export class RolesGuard implements CanActivate {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private reflector: Reflector
+    private reflector: Reflector,
+    private i18n: I18nService
   ) {}
 
   async canActivate(context: ExecutionContext) {
-    // دریافت نقش‌های مورد نیاز از دکوراتور @Roles
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [context.getHandler(), context.getClass()]);
 
-    // اگر نقشی تعیین نشده باشد، دسترسی مجاز است
     if (!requiredRoles) {
       return true;
     }
 
-    // دریافت کاربر از Request
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const findedUser = await this.userRepository.findOne({
@@ -31,13 +30,12 @@ export class RolesGuard implements CanActivate {
     });
 
     if (!user || !findedUser) {
-      throw new UnauthorizedException('توکن معتبر نیست');
+      throw new UnauthorizedException(this.i18n.t('errors.UNAUTHORIZED'));
     }
 
-    // بررسی نقش کاربر
     const hasRole = requiredRoles.some((role) => findedUser.role?.includes(role));
     if (!hasRole) {
-      throw new ForbiddenException('شما دسترسی لازم برای انجام این عملیات را ندارید.');
+      throw new ForbiddenException(this.i18n.t('errors.FORBIDDEN'));
     }
 
     return true;

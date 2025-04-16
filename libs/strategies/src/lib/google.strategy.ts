@@ -6,19 +6,10 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
-    if (!configService.get<string>('GOOGLE_CLIENT_ID')) {
-      throw new Error('GOOGLE_CLIENT_ID is not defined in the environment');
-    }
-    if (!configService.get<string>('GOOGLE_CLIENT_SECRET')) {
-      throw new Error('GOOGLE_CLIENT_SECRET is not defined in the environment');
-    }
-    if (!configService.get<string>('GOOGLE_AUTH_CALLBACK_URL')) {
-      throw new Error('GOOGLE_AUTH_CALLBACK_URL is not defined in the environment');
-    }
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID', ''),
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET', ''),
-      callbackURL: configService.get<string>('GOOGLE_AUTH_CALLBACK_URL', ''),
+      clientID: configService.getOrThrow<string>('GOOGLE_CLIENT_ID', ''),
+      clientSecret: configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET', ''),
+      callbackURL: configService.getOrThrow<string>('GOOGLE_AUTH_CALLBACK_URL', ''),
       scope: ['email', 'profile'],
     });
   }

@@ -7,13 +7,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
-    if (!configService.get<string>('JWT_SECRET_KEY')) {
-      throw new Error('JWT_SECRET_KEY is not defined in the environment');
-    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET_KEY') || '',
+      secretOrKey: configService.getOrThrow<string>('JWT_SECRET_KEY') || '',
       passReqToCallback: true,
     });
   }

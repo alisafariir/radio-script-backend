@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { NotAcceptableException } from '@nestjs/common';
 import { memoryStorage } from 'multer';
 import { extname } from 'path';
 // Define allowed file extensions
@@ -14,7 +14,7 @@ export const multerOptions = {
     if (allowedExtensions.includes(fileExtension)) {
       cb(null, true);
     } else {
-      cb(new BadRequestException('فرمت فایل نا‌معتبر است.'), false);
+      cb(new NotAcceptableException('invalid format'), false);
     }
   },
   storage: memoryStorage(),
@@ -31,7 +31,7 @@ export const avatarMulterOptions = {
     if (allowedAvatarExtensions.includes(fileExtension)) {
       cb(null, true);
     } else {
-      cb(new BadRequestException('فرمت فایل نا‌معتبر است.'), false);
+      cb(new NotAcceptableException('invalid format'), false);
     }
   },
   storage: memoryStorage(),

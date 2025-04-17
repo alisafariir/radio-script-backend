@@ -238,7 +238,7 @@ export class AuthService {
 
   async getProfile(user_id: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, tokens, id, media, ...filtredUserData } = await this.userRepository.findOne({ where: { id: user_id } });
+    const { password, tokens, id, media, deleted_at, last_login, ...filtredUserData } = await this.userRepository.findOne({ where: { id: user_id } });
 
     return filtredUserData;
   }

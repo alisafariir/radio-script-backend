@@ -2,7 +2,9 @@ import { Column, CreateDateColumn, Entity, Index, OneToMany } from 'typeorm';
 
 import { UserRole } from '@/enums';
 import { BaseEntity } from './base.entity';
+import { Comment } from './comment.entity';
 import { Media } from './media.entity';
+import { Post } from './post.entity';
 import { Token } from './token.entity';
 
 @Entity()
@@ -43,8 +45,14 @@ export class User extends BaseEntity {
   @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];
 
-  @OneToMany(() => Media, (media) => media.user)
+  @OneToMany(() => Media, (media) => media.author)
   media: Media[];
+
+  @OneToMany(() => Post, (post) => post.author)
+  posts: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments: Comment[];
 
   @Column({ nullable: true, default: false })
   blocked: boolean;

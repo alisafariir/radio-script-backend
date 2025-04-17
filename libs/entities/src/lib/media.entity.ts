@@ -1,18 +1,32 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+// src/media/media.entity.ts
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
-@Entity()
+@Entity('media')
 export class Media extends BaseEntity {
   @Column()
-  file_name: string; // نام فایل
+  filename: string;
 
   @Column()
-  url: string; // آدرس فایل در S3
-
-  @ManyToOne(() => User, (user) => user.media) // رابطه با کاربر
-  user: User;
+  mimetype: string;
 
   @Column()
-  user_id: string; // شناسه کاربر آپلودکننده
+  url: string;
+
+  @Column({ nullable: true })
+  altText?: string;
+
+  @Column({ nullable: true })
+  caption?: string;
+
+  @Column({ nullable: true })
+  size?: number;
+
+  @ManyToOne(() => User, (user) => user.media, { eager: true })
+  @JoinColumn({ name: 'author_id' })
+  author: User;
+
+  @Column({ name: 'author_id' })
+  authorId: string;
 }

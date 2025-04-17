@@ -36,7 +36,8 @@
       "@/strategies": ["libs/strategies/src/index.ts"],
       "@/token": ["features/token/src/index.ts"],
       "@/types": ["libs/types/src/index.ts"],
-      "@/user": ["features/user/src/index.ts"]
+      "@/user": ["features/user/src/index.ts"],
+      "@C:/Program Files/Git/post": ["features/post/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

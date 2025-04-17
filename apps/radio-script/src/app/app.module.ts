@@ -1,6 +1,7 @@
 import { AuthModule } from '@/auth';
 import { DatabaseModule } from '@/database';
 import { EnvironmentModule } from '@/environments';
+import { HealthModule } from '@/health';
 import { EncryptionService, OtpService } from '@/helpers';
 import { MailModule } from '@/mail';
 import { MediaModule } from '@/media';
@@ -27,6 +28,8 @@ import { AppService } from './app.service';
     SmsModule,
     TokenModule,
     UserModule,
+    AuthModule,
+    HealthModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,

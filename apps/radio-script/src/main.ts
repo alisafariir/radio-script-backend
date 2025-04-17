@@ -4,6 +4,7 @@
  */
 
 import { GlobalExceptionFilter } from '@/filters';
+import { setupSwagger } from '@/helpers';
 import { TranslateInterceptor } from '@/interceptors';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -20,7 +21,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const allowedOrigins = configService.getOrThrow<string>('ALLOW_ORIGINS').split(',');
+  const allowedOrigins = configService.getOrThrow<string>('APP_ALLOW_ORIGINS').split(',');
 
   app.useGlobalPipes(
     new ValidationPipe(),
@@ -61,6 +62,8 @@ async function bootstrap() {
     },
     credentials: true,
   });
+
+  setupSwagger(app);
 
   await app.listen(port);
   Logger.log(`🚀 Application is running on:${port}/${globalPrefix}/v${defaultVersion}`);

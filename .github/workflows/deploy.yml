@@ -6,11 +6,13 @@ on:
       - main
 
 env:
+  APP_ALLOW_ORIGINS: ${{ secrets.APP_ALLOW_ORIGINS }}
+  APP_DEFAULT_LANG: ${{ secrets.APP_DEFAULT_LANG }}
   APP_DOMAIN_WILDCARD: ${{ secrets.APP_DOMAIN_WILDCARD }}
-  ALLOW_ORIGINS: ${{ secrets.ALLOW_ORIGINS }}
   APP_IMAGE_NAME: ${{ secrets.APP_IMAGE_NAME }}
   APP_NAME: ${{ secrets.APP_NAME }}
   APP_PORT: ${{ secrets.APP_PORT }}
+  APP_SWAGGER_PASSWORD: ${{ secrets.APP_SWAGGER_PASSWORD }}
 
   S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
   S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
@@ -77,11 +79,13 @@ jobs:
         run: |
           touch .env
 
+          echo APP_ALLOW_ORIGINS=${{ env.APP_ALLOW_ORIGINS }} >> .env
+          echo APP_DEFAULT_LANG=${{ env.APP_DEFAULT_LANG }} >> .env
           echo APP_DOMAIN_WILDCARD=${{ env.APP_DOMAIN_WILDCARD }} >> .env
-          echo ALLOW_ORIGINS=${{ env.ALLOW_ORIGINS }} >> .env
           echo APP_IMAGE_NAME=${{ env.APP_IMAGE_NAME }} >> .env
           echo APP_NAME=${{ env.APP_NAME }} >> .env
           echo APP_PORT=${{ env.APP_PORT }} >> .env
+          echo APP_SWAGGER_PASSWORD=${{ env.APP_SWAGGER_PASSWORD }} >> .env
 
           echo S3_ACCESS_KEY_ID=${{ env.S3_ACCESS_KEY_ID }} >> .env
           echo S3_ENDPOINT=${{ env.S3_ENDPOINT }} >> .env

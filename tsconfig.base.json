@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@/auth": ["features/auth/src/index.ts"],
+      "@/category": ["features/category/src/index.ts"],
+      "@/comment": ["features/comment/src/index.ts"],
       "@/constants": ["libs/constants/src/index.ts"],
       "@/database": ["libs/database/src/index.ts"],
       "@/decorators": ["libs/decorators/src/index.ts"],
@@ -27,20 +30,18 @@
       "@/helpers": ["libs/helpers/src/index.ts"],
       "@/interceptors": ["libs/interceptors/src/index.ts"],
       "@/interfaces": ["libs/interfaces/src/index.ts"],
-      "@/strategies": ["libs/strategies/src/index.ts"],
-      "@/types": ["libs/types/src/index.ts"],
-      "@/auth": ["features/auth/src/index.ts"],
-      "@/category": ["features/category/src/index.ts"],
-      "@/comment": ["features/comment/src/index.ts"],
       "@/mail": ["features/mail/src/index.ts"],
       "@/media": ["features/media/src/index.ts"],
       "@/otp": ["features/otp/src/index.ts"],
       "@/post": ["features/post/src/index.ts"],
       "@/post-meta": ["features/post-meta/src/index.ts"],
       "@/sms": ["features/sms/src/index.ts"],
+      "@/strategies": ["libs/strategies/src/index.ts"],
       "@/tag": ["features/tag/src/index.ts"],
       "@/token": ["features/token/src/index.ts"],
-      "@/user": ["features/user/src/index.ts"]
+      "@/types": ["libs/types/src/index.ts"],
+      "@/user": ["features/user/src/index.ts"],
+      "@/health": ["features/health/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

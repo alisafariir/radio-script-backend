@@ -1,4 +1,6 @@
 import { AuthModule } from '@/auth';
+import { CategoryModule } from '@/category';
+import { CommentModule } from '@/comment';
 import { DatabaseModule } from '@/database';
 import { EnvironmentModule } from '@/environments';
 import { HealthModule } from '@/health';
@@ -6,7 +8,10 @@ import { EncryptionService, OtpService } from '@/helpers';
 import { MailModule } from '@/mail';
 import { MediaModule } from '@/media';
 import { OtpModule } from '@/otp';
+import { PostModule } from '@/post';
+import { PostMetaModule } from '@/post-meta';
 import { SmsModule } from '@/sms';
+import { TagModule } from '@/tag';
 import { TokenModule } from '@/token';
 import { UserModule } from '@/user';
 import { Module } from '@nestjs/common';
@@ -19,17 +24,21 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
-    EnvironmentModule,
-    DatabaseModule,
     AuthModule,
+    CategoryModule,
+    CommentModule,
+    DatabaseModule,
+    EnvironmentModule,
+    HealthModule,
     MailModule,
     MediaModule,
     OtpModule,
+    PostModule,
+    PostMetaModule,
     SmsModule,
+    TagModule,
     TokenModule,
     UserModule,
-    AuthModule,
-    HealthModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,

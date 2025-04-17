@@ -144,7 +144,7 @@ export class AuthService {
       await this.userRepository.update(existingUser.id, {
         first_name: given_name,
         last_name: family_name,
-        avatar_url: picture,
+        avatar_url: existingUser.avatar_url ? existingUser.avatar_url : picture,
       });
       const tokens = await this.createToken(existingUser, deviceInfo);
       const profile = await this.getProfile(existingUser.id);

@@ -166,3 +166,15 @@ Contributions are welcome! Please follow these steps:
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Create library
+
+```
+npx nx generate @nx/nest:library --directory=libs/<lib-name> --publishable=true --controller=true --global=true --importPath=@/<lib-name> --name=<lib-name> --service=true --strict=false --no-interactive
+```
+
+## Create feature
+
+```
+npx nx generate @nx/nest:library --directory=features/<feature-name> --publishable=true --controller=true --global=true --importPath=@/<feature-name> --name=<feature-name> --service=true --strict=false --no-interactive
+```

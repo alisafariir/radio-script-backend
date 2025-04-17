@@ -1,7 +1,7 @@
 {
-  "name": "media",
+  "name": "tag",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "features/media/src",
+  "sourceRoot": "features/tag/src",
   "projectType": "library",
   "release": {
     "version": {
@@ -18,11 +18,11 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/features/media",
-        "tsConfig": "features/media/tsconfig.lib.json",
-        "packageJson": "features/media/package.json",
-        "main": "features/media/src/index.ts",
-        "assets": ["features/media/*.md"]
+        "outputPath": "dist/features/tag",
+        "tsConfig": "features/tag/tsconfig.lib.json",
+        "packageJson": "features/tag/package.json",
+        "main": "features/tag/src/index.ts",
+        "assets": ["features/tag/*.md"]
       }
     },
     "nx-release-publish": {

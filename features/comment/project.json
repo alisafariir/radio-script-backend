@@ -7,7 +7,8 @@
     "version": {
       "generatorOptions": {
         "packageRoot": "dist/{projectRoot}",
-        "currentVersionResolver": "git-tag"
+        "currentVersionResolver": "git-tag",
+        "fallbackCurrentVersionResolver": "disk"
       }
     }
   },

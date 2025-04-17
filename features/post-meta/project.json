@@ -1,7 +1,7 @@
 {
-  "name": "media",
+  "name": "post-meta",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "features/media/src",
+  "sourceRoot": "features/post-meta/src",
   "projectType": "library",
   "release": {
     "version": {
@@ -18,11 +18,11 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/features/media",
-        "tsConfig": "features/media/tsconfig.lib.json",
-        "packageJson": "features/media/package.json",
-        "main": "features/media/src/index.ts",
-        "assets": ["features/media/*.md"]
+        "outputPath": "dist/features/post-meta",
+        "tsConfig": "features/post-meta/tsconfig.lib.json",
+        "packageJson": "features/post-meta/package.json",
+        "main": "features/post-meta/src/index.ts",
+        "assets": ["features/post-meta/*.md"]
       }
     },
     "nx-release-publish": {

@@ -1,9 +1,16 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
+import { I18nContext } from 'nestjs-i18n';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  constructor(
+    private readonly configService: ConfigService // ✅ Inject ConfigService
+  ) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
+    const i18n = I18nContext.current(host);
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
@@ -14,7 +21,22 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let message: string | object = isHttpException ? exception.getResponse() : (exception as any)?.message || 'Internal server error';
 
     if (status === HttpStatus.PAYLOAD_TOO_LARGE) {
-      message = 'حجم فایل ارسالی شما بزرگتر از حد مجاز است. لطفاً فایل کوچکتری ارسال کنید.';
+      message = 'validation.FILE_TOO_LARGE';
+    }
+
+    // ✅ Get default language from ConfigService
+    const defaultLang = this.configService.get<string>('APP_DEFAULT_LANG', 'fa');
+    const lang = defaultLang || i18n?.lang;
+
+    let translatedMessage: string | string[] | object = message;
+
+    if (typeof message === 'object' && i18n) {
+      const rawMessage = (message as any)?.message;
+      if (Array.isArray(rawMessage)) {
+        translatedMessage = rawMessage.map((msg: string) => i18n.t(msg, { lang }) || msg);
+      } else if (typeof rawMessage === 'string') {
+        translatedMessage = i18n.t(rawMessage, { lang }) || rawMessage;
+      }
     }
 
     const errorResponse = {
@@ -22,7 +44,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
-      message: typeof message === 'string' ? message : (message as any)?.message || message,
+      message: translatedMessage,
     };
 
     response.status(status).json(errorResponse);

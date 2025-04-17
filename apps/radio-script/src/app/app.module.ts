@@ -11,7 +11,7 @@ import { UserModule } from '@/user';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -39,7 +39,7 @@ import { AppService } from './app.service';
         path: join(__dirname, '/i18n/'),
         watch: true,
       },
-      resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver, new HeaderResolver(['x-lang'])],
+      resolvers: [{ use: AcceptLanguageResolver, options: ['lang', 'locale', 'l'] }],
     }),
   ],
   controllers: [AppController],

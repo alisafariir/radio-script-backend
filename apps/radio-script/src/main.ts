@@ -31,7 +31,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(
-    new GlobalExceptionFilter(),
+    new GlobalExceptionFilter(configService),
     new I18nValidationExceptionFilter({
       detailedErrors: false,
     })

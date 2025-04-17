@@ -1,3 +1,4 @@
+// src/s3/s3.service.ts
 import { DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandInput, S3Client, S3ServiceException } from '@aws-sdk/client-s3';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -41,52 +42,44 @@ export class S3Service {
     try {
       await this.s3Client.send(new PutObjectCommand(params));
       return `${this.endpoint}/${this.bucketName}/${key}`;
-    } catch (error) {
-      this.logger.error(`Error uploading file ${key}`, error);
-      throw this.handleS3Error(error);
+    } catch (err) {
+      this.logger.error(`Error uploading file ${key}`, err as any);
+      throw this.handleS3Error(err);
     }
   }
 
   async deleteFile(key: string): Promise<void> {
     try {
-      await this.s3Client.send(
-        new DeleteObjectCommand({
-          Bucket: this.bucketName,
-          Key: key,
-        })
-      );
-    } catch (error) {
-      this.logger.error(`Error deleting file ${key}`, error);
-      throw this.handleS3Error(error);
+      await this.s3Client.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }));
+    } catch (err) {
+      this.logger.error(`Error deleting file ${key}`, err as any);
+      throw this.handleS3Error(err);
     }
   }
 
   async deleteDirectory(prefix: string): Promise<void> {
-    // Ensure prefix ends with '/' for directory behavior
     if (!prefix.endsWith('/')) {
       prefix += '/';
     }
 
     try {
-      let continuationToken: string | undefined;
-      let objectsToDelete: { Key: string }[] = [];
-
-      // First check if directory exists
-      const listResponse = await this.s3Client.send(
+      // First, check existence
+      const checkList = await this.s3Client.send(
         new ListObjectsV2Command({
           Bucket: this.bucketName,
           Prefix: prefix,
-          MaxKeys: 1, // We only need to know if at least one object exists
+          MaxKeys: 1,
         })
       );
-
-      // If no objects found, directory doesn't exist
-      if (!listResponse.Contents || listResponse.Contents.length === 0) {
+      if (!checkList.Contents || checkList.Contents.length === 0) {
         this.logger.log(`Directory ${prefix} does not exist`);
         return;
       }
 
-      // If directory exists, proceed with full deletion
+      // Gather all keys
+      let continuationToken: string | undefined = undefined;
+      const objectsToDelete: { Key: string }[] = [];
+
       do {
         const listResponse = await this.s3Client.send(
           new ListObjectsV2Command({
@@ -97,13 +90,16 @@ export class S3Service {
         );
 
         if (listResponse.Contents?.length) {
-          objectsToDelete = objectsToDelete.concat(listResponse.Contents.map((obj) => ({ Key: obj.Key! }))); // Added missing parenthesis here
+          for (const obj of listResponse.Contents) {
+            if (obj.Key) {
+              objectsToDelete.push({ Key: obj.Key });
+            }
+          }
         }
-
         continuationToken = listResponse.NextContinuationToken;
       } while (continuationToken);
 
-      // Delete in batches of 1000 (S3 limit)
+      // Batch delete (1000 max per request)
       for (let i = 0; i < objectsToDelete.length; i += 1000) {
         const batch = objectsToDelete.slice(i, i + 1000);
         await this.s3Client.send(
@@ -115,38 +111,36 @@ export class S3Service {
       }
 
       this.logger.log(`Deleted ${objectsToDelete.length} objects from ${prefix}`);
-    } catch (error) {
-      if (this.isNoSuchKeyError(error)) {
+    } catch (err) {
+      if (this.isNoSuchKeyError(err)) {
         this.logger.log(`Directory ${prefix} does not exist`);
         return;
       }
-      this.logger.error(`Error deleting directory ${prefix}`, error);
-      throw this.handleS3Error(error);
+      this.logger.error(`Error deleting directory ${prefix}`, err as any);
+      throw this.handleS3Error(err);
     }
   }
 
-  private isNoSuchKeyError(error: unknown): boolean {
-    if (error instanceof Error && 'code' in error) {
-      return error.code === 'NoSuchKey' || error.message.includes('NoSuchKey') || error.message.includes('not found');
+  private isNoSuchKeyError(err: unknown): boolean {
+    if (err instanceof Error && 'code' in err) {
+      const code = (err as any).code as string;
+      return code === 'NoSuchKey' || err.message.includes('NoSuchKey') || err.message.includes('not found');
     }
     return false;
   }
 
-  private handleS3Error(error: unknown): Error {
-    if (error instanceof S3ServiceException) {
-      // Handle specific S3 errors
-      if (error.$response?.body) {
-        try {
-          const body = error.$response.body.toString();
-          if (body.includes('<html>')) {
-            return new Error('Received HTML error page instead of API response');
-          }
-        } catch (e) {
-          this.logger.warn('Failed to parse error response body', e);
+  private handleS3Error(err: unknown): Error {
+    if (err instanceof S3ServiceException) {
+      try {
+        const body = err.$response?.body?.toString();
+        if (body?.includes('<html>')) {
+          return new Error('Received HTML error page instead of API response');
         }
+      } catch {
+        this.logger.warn('Failed to parse S3 error response body');
       }
-      return error;
+      return err;
     }
-    return error instanceof Error ? error : new Error('Unknown S3 error');
+    return err instanceof Error ? err : new Error('Unknown S3 error');
   }
 }

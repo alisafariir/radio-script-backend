@@ -1,9 +1,11 @@
-import { Global, Module } from '@nestjs/common';
+import { Tag } from '@/entities';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { TagController } from './tag.controller';
 import { TagService } from './tag.service';
 
-@Global()
 @Module({
+  imports: [TypeOrmModule.forFeature([Tag])],
   controllers: [TagController],
   providers: [TagService],
   exports: [TagService],

@@ -10,12 +10,11 @@ import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { I18nModule } from 'nestjs-i18n';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
-  imports: [UserModule, PassportModule, SmsModule, TokenModule, TypeOrmModule.forFeature([User]), I18nModule],
+  imports: [UserModule, PassportModule, SmsModule, TokenModule, TypeOrmModule.forFeature([User])],
 
   controllers: [AuthController],
   providers: [

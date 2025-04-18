@@ -1,3 +1,4 @@
+import { CreateTagDto } from '@/dtos';
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { TagService } from './tag.service';
 
@@ -6,7 +7,7 @@ export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Post()
-  create(@Body() body: { name: string; slug: string }) {
+  create(@Body() body: CreateTagDto) {
     return this.tagService.create(body.name, body.slug);
   }
 

@@ -1,3 +1,4 @@
+import { CreateCategoryDto } from '@/dtos';
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { CategoryService } from './category.service';
 
@@ -6,7 +7,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  create(@Body() body: { name: string; slug: string; parentId?: string }) {
+  create(@Body() body: CreateCategoryDto) {
     return this.categoryService.create(body.name, body.slug, body.parentId);
   }
 

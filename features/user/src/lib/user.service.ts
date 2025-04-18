@@ -2,7 +2,6 @@ import { CreateUserByEmailDto, CreateUserByPhoneNumberDto, UpdateUserDto } from 
 import { User } from '@/entities';
 import { EncryptionService } from '@/helpers';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -12,7 +11,6 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private configService: ConfigService,
     private encryptionService: EncryptionService,
     private readonly i18n: I18nService
   ) {}

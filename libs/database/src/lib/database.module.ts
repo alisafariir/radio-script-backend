@@ -1,4 +1,4 @@
-import { Media, Otp, Token, User } from '@/entities';
+import { Category, Comment, Media, Otp, Post, PostMeta, Tag, Token, User } from '@/entities';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,8 +15,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.getOrThrow<string>('DATABASE_USER'),
         password: configService.getOrThrow<string>('DATABASE_PASSWORD'),
         database: configService.getOrThrow<string>('DATABASE_NAME'),
-        entities: [User, Token, Media, Otp],
+        entities: [User, Token, Media, Otp, Post, PostMeta, Category, Tag, Comment],
         synchronize: true,
+        migrationsRun: true,
       }),
     }),
   ],

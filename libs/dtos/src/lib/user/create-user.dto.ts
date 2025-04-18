@@ -1,13 +1,7 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-  MinLength,
-} from "class-validator";
+import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString, MinLength } from 'class-validator';
 
 export class CreateUserByPhoneNumberDto {
-  @IsPhoneNumber("IR")
+  @IsPhoneNumber('IR')
   @IsNotEmpty()
   phone_number: string;
 

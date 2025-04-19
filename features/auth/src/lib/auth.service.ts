@@ -1,11 +1,12 @@
 import { ChangePasswordDto, ForgotPasswordDto, GoogleOneTapDto, IdentityDto, LoginDto, LoginOtpDto, OtpDto, RegisterDto, UpdateEmailDto, UpdatePhoneNumberDto, UpdateProfileDto } from '@/dtos';
 import { User } from '@/entities';
+import { UserRole } from '@/enums';
 import { EncryptionService, S3Service } from '@/helpers';
 import { DeviceInfo } from '@/interfaces';
 import { OtpService } from '@/otp';
 import { TokenService } from '@/token';
 import { SocialLoginProvider } from '@/types';
-import { BadRequestException, ConflictException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
@@ -88,6 +89,27 @@ export class AuthService {
     }
     if (existingUser.created_by === 'social_login') {
       throw new BadRequestException(this.i18nService.t('error.CREATED_BY_SOCIAL_LOGIN'));
+    }
+    const isValidPassword = await this.encryptionService.compare(password, existingUser.password);
+
+    if (!password || !isValidPassword) {
+      throw new BadRequestException(this.i18nService.t('error.INVALID_PASSWORD'));
+    }
+
+    const token = await this.createToken(existingUser, deviceInfo);
+    const profile = await this.getProfile(existingUser.id);
+    return { ...token, ...profile };
+  }
+
+  async panelLogin({ email, phone_number, password }: LoginDto, deviceInfo: DeviceInfo) {
+    const existingUser = await this.userRepository.findOne({
+      where: [{ email }, { phone_number }],
+    });
+    if (!existingUser) {
+      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+    }
+    if (existingUser.role.includes(UserRole.USER)) {
+      throw new ForbiddenException(this.i18nService.t('error.FORBIDDEN'));
     }
     const isValidPassword = await this.encryptionService.compare(password, existingUser.password);
 
@@ -354,19 +376,6 @@ export class AuthService {
 
   async logout(request: Request) {
     return await this.tokenService.revokeTokenByRequest(request);
-  }
-
-  async deleteAccount(user_id: string) {
-    const user = await this.userRepository.findOne({ where: { id: user_id } });
-    if (!user) throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
-
-    if (user.role !== 'user') {
-      throw new BadRequestException(this.i18nService.t('error.USER_CAN_NOT_DELETED_BY_ROLE'));
-    }
-
-    await this.tokenService.deleteAllTokensByUserId(user.id);
-    await this.userRepository.delete(user.id);
-    return { message: this.i18nService.t('info.ACCOUNT_DELETED') };
   }
 
   private createSocialCallbackUrl(access_token: string, refresh_token: string, provider: SocialLoginProvider) {

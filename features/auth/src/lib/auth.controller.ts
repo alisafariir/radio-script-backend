@@ -33,6 +33,13 @@ export class AuthController {
     return user;
   }
 
+  @Post('panel-login')
+  async panelLogin(@Body() loginDto: LoginDto, @Req() request: Request, @Res({ passthrough: true }) res: Response) {
+    const user = await this.authService.panelLogin(loginDto, request['deviceInfo']);
+    await this.cookieService.setResponseTokenCookies(res, user.access_token, user.refresh_token);
+    return user;
+  }
+
   @Post('login-otp')
   async loginOtp(@Body() loginDto: LoginOtpDto, @Req() request: Request, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.loginOtp(loginDto, request['deviceInfo']);
@@ -148,18 +155,9 @@ export class AuthController {
     return data;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     await this.cookieService.deleteResponseTokenCookies(res);
     return await this.authService.logout(req);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete('delete-account')
-  async deleteAccount(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const user_id = req['user']['sub'];
-    await this.cookieService.deleteResponseTokenCookies(res);
-    return this.authService.deleteAccount(user_id);
   }
 }

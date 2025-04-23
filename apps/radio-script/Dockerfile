@@ -5,24 +5,27 @@ FROM node:latest AS builder
 
 WORKDIR /app
 
-# Copy Nx + package config from root
-COPY nx.json ./
-COPY project.json ./
-COPY tsconfig.base.json ./
 COPY package*.json ./
 
-# Copy your Nx project folders
+# Install dependencies - robust approach that handles all cases
+RUN if [ -f package-lock.json ]; then \
+    npm ci || (echo "Lock file invalid, running npm install instead..." && npm install); \
+    else \
+    npm install; \
+    fi
+
+# Now copy the rest of the configuration files
+COPY nx.json .
+COPY project.json .
+COPY tsconfig.base.json .
+
+# Copy source files
 COPY apps/ ./apps
 COPY features/ ./features
 COPY libs/ ./libs
-# If you have a `tools/` folder or other Nx-related folders, copy them as well
-# COPY tools/ ./tools
 
-# Install dependencies (including devDependencies for building)
-RUN npm ci
-
-# Now build the target app (replace with your app name)
-RUN npx nx build radio-script
+# Build the target app
+RUN npx nx build radio-script --prod
 
 # -----------------------------------------------------------
 # Stage 2: Runtime
@@ -33,13 +36,14 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy the build output from the builder stage
+# Copy built application
 COPY --from=builder /app/dist/apps/radio-script ./dist
 
-# Copy package.json files to install only runtime deps
-COPY package*.json ./
+# Copy production dependencies
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/package-lock.json ./
 
-RUN npm ci --omit=dev
+# Install production dependencies
+RUN npm ci --omit=dev --ignore-scripts
 
-# Run the compiled app
 CMD ["node", "dist/main.js"]

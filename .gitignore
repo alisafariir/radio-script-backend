@@ -8,7 +8,7 @@ out-tsc
 # dependencies
 node_modules
 
-.env.*
+.env*
 !.env.sample
 
 

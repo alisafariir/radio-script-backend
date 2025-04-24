@@ -16,7 +16,7 @@ export class MediaService {
     private readonly s3Service: S3Service
   ) {}
 
-  async upload(file: Express.Multer.File): Promise<Media> {
+  async upload(file: Express.Multer.File, userId: string): Promise<Media> {
     const fileName = `${uuidv4()}-${file.originalname}`;
     const key = `${this.uploadFolder}/${fileName}`;
     // این متد آدرس کامل (URL) را برمی‌گرداند
@@ -27,9 +27,14 @@ export class MediaService {
       mimetype: file.mimetype,
       size: file.size,
       url,
+      authorId: userId,
     });
 
     return this.mediaRepo.save(media);
+  }
+
+  findOne(id: string): Promise<Media> {
+    return this.mediaRepo.findOne({ where: { id } });
   }
 
   findAll(): Promise<Media[]> {

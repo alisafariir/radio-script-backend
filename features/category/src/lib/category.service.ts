@@ -26,10 +26,24 @@ export class CategoryService {
     return this.categoryRepo.findTrees();
   }
 
+  deleted() {
+    return this.categoryRepo.find({
+      withDeleted: true,
+    });
+  }
+
   async findOne(id: string) {
     const cat = await this.categoryRepo.findOne({ where: { id } });
     if (!cat) throw new NotFoundException('Category not found');
     return cat;
+  }
+
+  async recover(id: string) {
+    const cat = await this.categoryRepo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    return this.categoryRepo.recover(cat);
   }
 
   async remove(id: string) {

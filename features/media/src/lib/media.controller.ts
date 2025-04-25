@@ -4,6 +4,7 @@ import { Roles } from '@/decorators';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 import { memoryStorage } from 'multer';
 import { MediaService } from './media.service';
 
@@ -13,7 +14,7 @@ import { MediaService } from './media.service';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  @Post('upload')
+  @Post()
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),

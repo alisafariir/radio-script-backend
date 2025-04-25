@@ -1,8 +1,12 @@
-// src/post-meta/post-meta.controller.ts
+import { Roles } from '@/decorators';
 import { CreatePostMetaDto, UpdatePostMetaDto } from '@/dtos';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { UserRole } from '@/enums';
+import { JwtAuthGuard, RolesGuard } from '@/guards';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { PostMetaService } from './post-meta.service';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 @Controller('post-meta')
 export class PostMetaController {
   constructor(private readonly metaService: PostMetaService) {}

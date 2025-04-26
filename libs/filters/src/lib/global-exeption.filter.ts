@@ -5,9 +5,7 @@ import { I18nContext } from 'nestjs-i18n';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(
-    private readonly configService: ConfigService // ✅ Inject ConfigService
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const i18n = I18nContext.current(host);
@@ -18,33 +16,37 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const isHttpException = exception instanceof HttpException;
     const status = isHttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let message: string | object = isHttpException ? exception.getResponse() : (exception as any)?.message || 'Internal server error';
+    // می‌گیریم پیام خام رو
+    const rawResponse = isHttpException ? exception.getResponse() : { message: (exception as any)?.message || 'Internal server error' };
 
-    if (status === HttpStatus.PAYLOAD_TOO_LARGE) {
-      message = 'validation.FILE_TOO_LARGE';
+    // استخراج پیام (ممکنه رشته یا آرایه باشه)
+    let messages: string[] = [];
+    if (typeof rawResponse === 'object') {
+      const m = (rawResponse as any).message;
+      messages = Array.isArray(m) ? m : [m];
+    } else {
+      messages = [String(rawResponse)];
     }
 
-    // ✅ Get default language from ConfigService
+    // ترجمه‌ی هر پیام (در صورت نیاز)
     const defaultLang = this.configService.get<string>('APP_DEFAULT_LANG', 'fa');
-    const lang = defaultLang || i18n?.lang;
+    const lang = i18n?.lang || defaultLang;
 
-    let translatedMessage: string | string[] | object = message;
+    const translated = messages.map((msg) => (typeof msg === 'string' && i18n ? i18n.t(msg, { lang }) || msg : String(msg)));
 
-    if (typeof message === 'object' && i18n) {
-      const rawMessage = (message as any)?.message;
-      if (Array.isArray(rawMessage)) {
-        translatedMessage = rawMessage.map((msg: string) => i18n.t(msg, { lang }) || msg);
-      } else if (typeof rawMessage === 'string') {
-        translatedMessage = i18n.t(rawMessage, { lang }) || rawMessage;
-      }
-    }
+    // تبدیل آرایه به رشته با جداکننده‌ی دلخواه
+    // برای جداکننده با کاما:
+    const joinedWithComma = translated.join(', ');
+    // یا برای هر پیام در خط جدید:
+    // const joinedWithNewline = translated.join('\n');
 
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
-      message: translatedMessage,
+      // اینجا یکی از دو مورد بالا را انتخاب کنید:
+      message: joinedWithComma,
     };
 
     response.status(status).json(errorResponse);

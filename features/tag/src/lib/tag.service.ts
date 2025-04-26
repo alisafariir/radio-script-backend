@@ -29,4 +29,17 @@ export class TagService {
     const tag = await this.findOne(id);
     return this.tagRepo.softRemove(tag);
   }
+
+  async recover(id: string) {
+    const cat = await this.tagRepo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    return this.tagRepo.recover(cat);
+  }
+  deleted() {
+    return this.tagRepo.find({
+      withDeleted: true,
+    });
+  }
 }

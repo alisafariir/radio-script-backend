@@ -31,4 +31,17 @@ export class PostMetaService {
     if (!meta) throw new NotFoundException('Meta not found');
     return this.metaRepo.softRemove(meta);
   }
+
+  async recover(id: string) {
+    const cat = await this.metaRepo.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    return this.metaRepo.recover(cat);
+  }
+  deleted() {
+    return this.metaRepo.find({
+      withDeleted: true,
+    });
+  }
 }

@@ -2,7 +2,7 @@ import { Roles } from '@/decorators';
 import { CreateTagDto } from '@/dtos';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { TagService } from './tag.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,6 +24,16 @@ export class TagController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tagService.findOne(id);
+  }
+
+  @Put('recover/:id')
+  recover(@Param('id') id: string) {
+    return this.tagService.recover(id);
+  }
+
+  @Get('deleted')
+  deleted() {
+    return this.tagService.deleted();
   }
 
   @Delete(':id')

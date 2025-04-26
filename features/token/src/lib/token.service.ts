@@ -178,7 +178,7 @@ export class TokenService {
 
   private extractToken(req: Request): string {
     // تلاش از کوکی
-    const tokenFromCookie = req.cookies?.jwt;
+    const tokenFromCookie = req.cookies?.access_token;
     if (tokenFromCookie) {
       return tokenFromCookie;
     }

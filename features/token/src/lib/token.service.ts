@@ -60,12 +60,12 @@ export class TokenService {
 
   async refreshToken(refreshToken: string, deviceInfo: DeviceInfo) {
     if (!refreshToken) {
-      throw new UnauthorizedException(this.i18n.t('error.REFRESH_TOKEN_REQUIRED'));
+      throw new UnauthorizedException('error.REFRESH_TOKEN_REQUIRED');
     }
 
     const tokenRecord = await this.findTokenByRefreshToken(refreshToken);
     if (!tokenRecord) {
-      throw new UnauthorizedException(this.i18n.t('error.REFRESH_TOKEN_NOT_FOUND'));
+      throw new UnauthorizedException('error.REFRESH_TOKEN_NOT_FOUND');
     }
 
     try {
@@ -74,14 +74,14 @@ export class TokenService {
         where: { id: tokenRecord.user_id },
       });
       if (!user) {
-        throw new UnauthorizedException(this.i18n.t('error.USER_REFRESH_TOKEN_NOT_FOUND'));
+        throw new UnauthorizedException('error.USER_REFRESH_TOKEN_NOT_FOUND');
       }
 
       await this.deleteByRefreshToken(refreshToken);
       return this.generateTokens(user, deviceInfo);
     } catch {
       await this.deleteByRefreshToken(refreshToken);
-      throw new UnauthorizedException(this.i18n.t('error.REFRESH_TOKEN_EXPIRED'));
+      throw new UnauthorizedException('error.REFRESH_TOKEN_EXPIRED');
     }
   }
 
@@ -92,7 +92,7 @@ export class TokenService {
     try {
       payload = await this.verifyToken(token);
     } catch {
-      throw new UnauthorizedException(this.i18n.t('error.ACCESS_TOKEN_INVALID'));
+      throw new UnauthorizedException('error.ACCESS_TOKEN_INVALID');
     }
 
     const tokenRecord = await this.tokenRepo.findOne({
@@ -100,10 +100,10 @@ export class TokenService {
     });
 
     if (!tokenRecord) {
-      throw new UnauthorizedException(this.i18n.t('error.ACCESS_TOKEN_NOT_FOUND'));
+      throw new UnauthorizedException('error.ACCESS_TOKEN_NOT_FOUND');
     }
     if (tokenRecord.access_token_expiration < new Date()) {
-      throw new UnauthorizedException(this.i18n.t('error.ACCESS_TOKEN_EXPIRED'));
+      throw new UnauthorizedException('error.ACCESS_TOKEN_EXPIRED');
     }
 
     tokenRecord.last_accessed = new Date();
@@ -185,11 +185,11 @@ export class TokenService {
 
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
-      throw new UnauthorizedException(this.i18n.t('error.ACCESS_TOKEN_NOT_FOUND'));
+      throw new UnauthorizedException('error.ACCESS_TOKEN_NOT_FOUND');
     }
     const [type, token] = authHeader.split(' ');
     if (type !== 'Bearer' || !token) {
-      throw new UnauthorizedException(this.i18n.t('error.ACCESS_TOKEN_NOT_FOUND'));
+      throw new UnauthorizedException('error.ACCESS_TOKEN_NOT_FOUND');
     }
     return token;
   }

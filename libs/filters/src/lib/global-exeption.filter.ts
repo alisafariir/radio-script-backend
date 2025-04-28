@@ -30,7 +30,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // ترجمه‌ی هر پیام (در صورت نیاز)
     const defaultLang = this.configService.get<string>('APP_DEFAULT_LANG', 'fa');
-    const lang = i18n?.lang || defaultLang;
+    const lang = defaultLang || i18n?.lang;
 
     const translated = messages.map((msg) => (typeof msg === 'string' && i18n ? i18n.t(msg, { lang }) || msg : String(msg)));
 

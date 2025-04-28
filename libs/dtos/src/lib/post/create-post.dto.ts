@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
-import { CreatePostMetaDto } from '../post-meta/create-post-meta.dto';
+import { CreatePostMetaNestedDto } from '../post-meta/create-post-meta.dto';
 
 export class CreatePostDto {
   @IsString()
@@ -34,10 +34,6 @@ export class CreatePostDto {
   @ApiProperty()
   slug: string;
 
-  @IsUUID()
-  @ApiProperty()
-  authorId: string;
-
   @IsOptional()
   @IsArray()
   @IsUUID('all', { each: true })
@@ -58,7 +54,7 @@ export class CreatePostDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreatePostMetaDto)
+  @Type(() => CreatePostMetaNestedDto)
   @ApiProperty()
-  meta?: CreatePostMetaDto[];
+  meta?: CreatePostMetaNestedDto[];
 }

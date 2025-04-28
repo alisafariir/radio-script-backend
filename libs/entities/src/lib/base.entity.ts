@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { BeforeInsert, BeforeUpdate, CreateDateColumn, DeleteDateColumn, PrimaryGeneratedColumn, BaseEntity as TypeORMBaseEntity, UpdateDateColumn } from 'typeorm';
 
 export abstract class BaseEntity extends TypeORMBaseEntity {
@@ -10,6 +11,7 @@ export abstract class BaseEntity extends TypeORMBaseEntity {
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 
+  @Exclude()
   @DeleteDateColumn({ default: null })
   deleted_at: Date;
 

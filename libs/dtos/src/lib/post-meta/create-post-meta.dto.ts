@@ -17,3 +17,13 @@ export class CreatePostMetaDto {
   @ApiProperty()
   value?: string;
 }
+
+export class CreatePostMetaNestedDto {
+  @IsString()
+  @IsNotEmpty()
+  key: string;
+
+  @IsOptional()
+  @IsString()
+  value?: string;
+}

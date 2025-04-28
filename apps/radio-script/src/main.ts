@@ -6,9 +6,9 @@
 import { GlobalExceptionFilter } from '@/filters';
 import { setupSwagger } from '@/helpers';
 import { TranslateInterceptor } from '@/interceptors';
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 import { AppModule } from './app/app.module';
@@ -38,7 +38,7 @@ async function bootstrap() {
     })
   );
 
-  app.useGlobalInterceptors(new TranslateInterceptor());
+  app.useGlobalInterceptors(new TranslateInterceptor(), new ClassSerializerInterceptor(app.get(Reflector)));
 
   app.use(cookieParser());
 

@@ -1,4 +1,4 @@
-import { Category, Media, Post, Tag, User } from '@/entities';
+import { Category, Media, Post, PostMeta, Tag, User } from '@/entities';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 export class PostService {
   constructor(
     @InjectRepository(Post) private readonly postRepo: Repository<Post>,
+    @InjectRepository(PostMeta) private readonly postMeta: Repository<PostMeta>,
     @InjectRepository(Category) private readonly categoryRepo: Repository<Category>,
     @InjectRepository(Tag) private readonly tagRepo: Repository<Tag>,
     @InjectRepository(Media) private readonly mediaRepo: Repository<Media>,
@@ -36,6 +37,14 @@ export class PostService {
     // تصویر شاخص
     if (featuredImageId) {
       post.featuredImage = await this.mediaRepo.findOneByOrFail({ id: featuredImageId });
+    }
+
+    if (dto.meta?.length) {
+      post.meta = dto.meta.map((m) => {
+        const pm = this.postMeta.create({ key: m.key, value: m.value });
+        pm.post = post; // حتماً اینجا رابطه رو ست می‌کنیم
+        return pm;
+      });
     }
 
     return this.postRepo.save(post);

@@ -53,7 +53,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(this.i18nService.t('error.USER_EXIST'));
+      throw new ConflictException('error.USER_EXIST');
     }
 
     if (existingUser?.deleted_at) {
@@ -85,15 +85,15 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+      throw new NotFoundException('error.USER_NOT_FOUND');
     }
     if (existingUser.created_by === 'social_login') {
-      throw new BadRequestException(this.i18nService.t('error.CREATED_BY_SOCIAL_LOGIN'));
+      throw new BadRequestException('error.CREATED_BY_SOCIAL_LOGIN');
     }
     const isValidPassword = await this.encryptionService.compare(password, existingUser.password);
 
     if (!password || !isValidPassword) {
-      throw new BadRequestException(this.i18nService.t('error.INVALID_PASSWORD'));
+      throw new BadRequestException('error.INVALID_PASSWORD');
     }
 
     const token = await this.createToken(existingUser, deviceInfo);
@@ -106,15 +106,15 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+      throw new NotFoundException('error.USER_NOT_FOUND');
     }
     if (existingUser.role.includes(UserRole.USER)) {
-      throw new ForbiddenException(this.i18nService.t('error.FORBIDDEN'));
+      throw new ForbiddenException('error.FORBIDDEN');
     }
     const isValidPassword = await this.encryptionService.compare(password, existingUser.password);
 
     if (!password || !isValidPassword) {
-      throw new BadRequestException(this.i18nService.t('error.INVALID_PASSWORD'));
+      throw new BadRequestException('error.INVALID_PASSWORD');
     }
 
     const token = await this.createToken(existingUser, deviceInfo);
@@ -130,7 +130,7 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+      throw new NotFoundException('error.USER_NOT_FOUND');
     }
 
     await this.otpService.sendOtp(recipient);
@@ -145,7 +145,7 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+      throw new NotFoundException('error.USER_NOT_FOUND');
     }
 
     await this.otpService.verifyOtp(otp, recipient);
@@ -229,7 +229,7 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+      throw new NotFoundException('error.USER_NOT_FOUND');
     }
 
     await this.otpService.sendOtp(recipient);
@@ -244,7 +244,7 @@ export class AuthService {
       where: [{ email }, { phone_number }],
     });
     if (!existingUser) {
-      throw new NotFoundException(this.i18nService.t('error.USER_NOT_FOUND'));
+      throw new NotFoundException('error.USER_NOT_FOUND');
     }
 
     await this.otpService.verifyOtp(otp, recipient);
@@ -259,10 +259,7 @@ export class AuthService {
   }
 
   async getProfile(user_id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, tokens, id, media, deleted_at, last_login, ...filtredUserData } = await this.userRepository.findOne({ where: { id: user_id } });
-
-    return filtredUserData;
+    return await this.userRepository.findOne({ where: { id: user_id } });
   }
 
   async updateProfile(user_id: string, updateProfileDto: UpdateProfileDto) {
@@ -271,7 +268,7 @@ export class AuthService {
         where: { phone_number: updateProfileDto.phone_number },
       });
       if (existingPhoneNumber) {
-        throw new ConflictException(this.i18nService.t('error.USER_PHONE_EXIST'));
+        throw new ConflictException('error.USER_PHONE_EXIST');
       }
     }
 
@@ -280,7 +277,7 @@ export class AuthService {
         where: { email: updateProfileDto.email },
       });
       if (existingEmail) {
-        throw new ConflictException(this.i18nService.t('error.USER_EMAIL_EXIST'));
+        throw new ConflictException('error.USER_EMAIL_EXIST');
       }
     }
 
@@ -304,7 +301,7 @@ export class AuthService {
       where: { email },
     });
     if (existingEmail) {
-      throw new ConflictException(this.i18nService.t('error.USER_EMAIL_EXIST'));
+      throw new ConflictException('error.USER_EMAIL_EXIST');
     }
     await this.userRepository.update(user_id, { email });
     const profile = await this.getProfile(user_id);
@@ -319,7 +316,7 @@ export class AuthService {
     });
 
     if (existingPhoneNumber) {
-      throw new ConflictException(this.i18nService.t('error.USER_PHONE_EXIST'));
+      throw new ConflictException('error.USER_PHONE_EXIST');
     }
     await this.userRepository.update(user_id, { phone_number });
     const profile = await this.getProfile(user_id);

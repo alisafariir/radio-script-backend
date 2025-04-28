@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, OneToMany } from 'typeorm';
 
 import { UserRole } from '@/enums';
+import { Exclude } from 'class-transformer';
 import { BaseEntity } from './base.entity';
 import { Comment } from './comment.entity';
 import { Media } from './media.entity';
@@ -17,9 +18,11 @@ export class User extends BaseEntity {
   @Column({ unique: true, nullable: true })
   email: string;
 
+  @Exclude()
   @Column({ default: 'system' })
   created_by: 'email' | 'phone_number' | 'social_login' | 'admin' | 'system';
 
+  @Exclude()
   @Column({ nullable: true })
   password: string;
 
@@ -42,15 +45,19 @@ export class User extends BaseEntity {
   })
   role: UserRole;
 
+  @Exclude()
   @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];
 
+  @Exclude()
   @OneToMany(() => Media, (media) => media.author)
   media: Media[];
 
+  @Exclude()
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
+  @Exclude()
   @OneToMany(() => Comment, (comment) => comment.author)
   comments: Comment[];
 
@@ -60,6 +67,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   block_reason: string;
 
+  @Exclude()
   @CreateDateColumn()
   last_login: Date;
 }

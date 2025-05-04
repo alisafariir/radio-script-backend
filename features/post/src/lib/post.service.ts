@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreatePostDto, PostQueryDto, UpdatePostDto } from '@/dtos';
 import { Request } from 'express';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class PostService {
@@ -52,30 +52,34 @@ export class PostService {
 
   async findAll(query: PostQueryDto) {
     const { search, status, type, category, page = 1, limit = 10 } = query;
-    const qb = this.postRepo
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.categories', 'category')
-      .leftJoinAndSelect('post.tags', 'tag')
-      .leftJoinAndSelect('post.author', 'author')
-      .leftJoinAndSelect('post.featuredImage', 'featuredImage')
-      .orderBy('post.createdAt', 'DESC')
-      .take(limit)
-      .skip((page - 1) * limit);
+
+    // ۱) آرایه را صریحاً تایپ کنید
+    const whereConditions: FindOptionsWhere<Post>[] = [];
 
     if (search) {
-      qb.andWhere('post.title ILIKE :s OR post.content ILIKE :s', { s: `%${search}%` });
+      whereConditions.push({ title: ILike(`%${search}%`) });
+      whereConditions.push({ content: ILike(`%${search}%`) });
     }
     if (status) {
-      qb.andWhere('post.status = :status', { status });
+      // اگر status هم باید با OR ترکیب شود، باید از Brackets یا QueryBuilder استفاده کنید.
+      // این مثال فقط نشان می‌دهد که چطور به TS بگویید این یک آرایه از FindOptionsWhere است.
+      whereConditions.push({ status });
     }
     if (type) {
-      qb.andWhere('post.type = :type', { type });
+      whereConditions.push({ type });
     }
     if (category) {
-      qb.andWhere('category.id = :cat', { cat: category });
+      whereConditions.push({ categories: { id: category } });
     }
 
-    const [data, total] = await qb.getManyAndCount();
+    const [data, total] = await this.postRepo.findAndCount({
+      where: whereConditions.length ? whereConditions : undefined,
+      relations: ['categories', 'tags', 'author', 'featuredImage'],
+      order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 

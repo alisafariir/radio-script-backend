@@ -1,4 +1,4 @@
-import { CreateUserByEmailDto, CreateUserByPhoneNumberDto, UpdateUserDto } from '@/dtos';
+import { CreateUserByEmailDto, CreateUserByPhoneNumberDto, UpdateUserDto, UserQueryDto } from '@/dtos';
 import { User } from '@/entities';
 import { EncryptionService } from '@/helpers';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -50,8 +50,13 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  async findAll(query: UserQueryDto): Promise<{ data: User[]; total: number; page: number; limit: number; totalPages: number }> {
+    const { page, limit } = query;
+    const [data, total] = await this.userRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findOne(id: string): Promise<User> {

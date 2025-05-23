@@ -30,3 +30,4 @@ export * from './lib/tag/update-tag.dto';
 
 export * from './lib/user/create-user.dto';
 export * from './lib/user/update-user.dto';
+export * from './lib/user/user-query.dto';

@@ -1,10 +1,10 @@
 import { Roles } from '@/decorators';
-import { CreateUserByPhoneNumberDto, UpdateUserDto } from '@/dtos';
+import { CreateUserByPhoneNumberDto, UpdateUserDto, UserQueryDto } from '@/dtos';
 import { User } from '@/entities';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
 import { UserResponseDto } from '@/interfaces';
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -20,9 +20,8 @@ export class UserController {
   }
 
   @Get()
-  async findAll(): Promise<UserResponseDto[]> {
-    const users = await this.userService.findAll();
-    return users.map(this.mapToUserResponseDto);
+  async findAll(@Query() query: UserQueryDto): Promise<{ data: UserResponseDto[]; total: number; page: number; limit: number; totalPages: number }> {
+    return await this.userService.findAll(query);
   }
 
   @Get(':id')

@@ -1,38 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsOptional, IsPhoneNumber, IsString, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
-export class UserQueryDto {
+export class PostMetaQueryDto {
   @IsOptional()
   @ApiProperty()
-  @IsString()
   search?: string;
 
-  @ApiProperty()
-  @IsEmail()
   @IsOptional()
-  email?: string;
-
-  @ApiProperty()
   @IsString()
-  @IsOptional()
-  first_name?: string;
+  @ApiProperty()
+  key?: string;
 
+  @IsOptional()
   @IsString()
-  @IsOptional()
   @ApiProperty()
-  last_name?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty()
-  picture?: string;
-
-  @IsPhoneNumber()
-  @IsOptional()
-  @ApiProperty()
-  phone_number?: string;
+  value?: string;
 
   @IsOptional()
   @Type(() => Number)

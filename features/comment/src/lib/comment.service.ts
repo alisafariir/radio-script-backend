@@ -1,5 +1,6 @@
 import { CommentQueryDto } from '@/dtos';
 import { Comment, Post, User } from '@/entities';
+import { PaginateResponse } from '@/interfaces';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
@@ -21,7 +22,7 @@ export class CommentService {
     return this.commentRepo.save(comment);
   }
 
-  findAll(query: CommentQueryDto) {
+  async findAll(query: CommentQueryDto): Promise<PaginateResponse<Comment[]>> {
     const { search, authorId, postId, content, page = 1, limit = 10 } = query;
     const whereConditions: FindOptionsWhere<Comment>[] = [];
 
@@ -41,12 +42,13 @@ export class CommentService {
       whereConditions.push({ content });
     }
 
-    return this.commentRepo.findAndCount({
+    const [data, total] = await this.commentRepo.findAndCount({
       where: whereConditions.length ? whereConditions : undefined,
       order: { created_at: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
     });
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   findAllByPost(postId: string, query: CommentQueryDto) {

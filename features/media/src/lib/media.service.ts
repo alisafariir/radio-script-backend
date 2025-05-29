@@ -1,6 +1,7 @@
 import { MediaQueryDto } from '@/dtos';
 import { Media } from '@/entities';
 import { S3Service } from '@/helpers';
+import { PaginateResponse } from '@/interfaces';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'multer';
@@ -38,12 +39,13 @@ export class MediaService {
     return this.mediaRepo.findOne({ where: { id } });
   }
 
-  findAll(query: MediaQueryDto): Promise<Media[]> {
+  async findAll(query: MediaQueryDto): Promise<PaginateResponse<Media[]>> {
     const { page = 1, limit = 10 } = query;
-    return this.mediaRepo.find({
+    const [data, total] = await this.mediaRepo.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
     });
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async remove(id: string): Promise<Media> {

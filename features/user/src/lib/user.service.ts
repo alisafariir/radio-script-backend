@@ -5,6 +5,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { UserPaginateResponse } from '@/interfaces';
 import { I18nService } from 'nestjs-i18n';
 @Injectable()
 export class UserService {
@@ -50,7 +51,7 @@ export class UserService {
     }
   }
 
-  async findAll(query: UserQueryDto): Promise<{ data: User[]; total: number; page: number; limit: number; totalPages: number }> {
+  async findAll(query: UserQueryDto): Promise<UserPaginateResponse> {
     const { page, limit } = query;
     const [data, total] = await this.userRepository.findAndCount({
       skip: (page - 1) * limit,

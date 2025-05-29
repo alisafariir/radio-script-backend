@@ -1,10 +1,9 @@
 import { Roles } from '@/decorators';
-import { CreateUserByPhoneNumberDto, UpdateUserDto, UserQueryDto } from '@/dtos';
+import { UpdateUserDto, UserQueryDto } from '@/dtos';
 import { User } from '@/entities';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
-import { UserResponseDto } from '@/interfaces';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -13,37 +12,23 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  async create(@Body() createUserDto: CreateUserByPhoneNumberDto): Promise<UserResponseDto> {
-    const user = await this.userService.createUserByPhoneNumber(createUserDto);
-    return this.mapToUserResponseDto(user);
-  }
-
   @Get()
-  async findAll(@Query() query: UserQueryDto): Promise<{ data: UserResponseDto[]; total: number; page: number; limit: number; totalPages: number }> {
+  async findAll(@Query() query: UserQueryDto) {
     return await this.userService.findAll(query);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    const user = await this.userService.findOne(id);
-    return this.mapToUserResponseDto(user);
+  async findOne(@Param('id') id: string): Promise<User> {
+    return await this.userService.findOne(id);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
-    const user = await this.userService.updateUser(id, updateUserDto);
-    return this.mapToUserResponseDto(user);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
+    return await this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<void> {
     await this.userService.deleteUser(id);
-  }
-
-  private mapToUserResponseDto(user: User): UserResponseDto {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userData } = user;
-    return userData;
   }
 }

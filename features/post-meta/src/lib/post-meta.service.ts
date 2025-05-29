@@ -1,9 +1,10 @@
 // src/post-meta/post-meta.service.ts
-import { CreatePostMetaDto, UpdatePostMetaDto } from '@/dtos';
+import { CreatePostMetaDto, PostMetaQueryDto, UpdatePostMetaDto } from '@/dtos';
 import { Post, PostMeta } from '@/entities';
+import { PaginateResponse } from '@/interfaces';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 
 @Injectable()
 export class PostMetaService {
@@ -15,7 +16,29 @@ export class PostMetaService {
     return this.metaRepo.save(meta);
   }
 
-  async findAll(postId: string) {
+  async findAll(query: PostMetaQueryDto): Promise<PaginateResponse<PostMeta[]>> {
+    const { key, value, page = 1, limit = 10 } = query;
+    const whereConditions: FindOptionsWhere<PostMeta>[] = [];
+
+    if (key) {
+      whereConditions.push({ key });
+    }
+
+    if (value) {
+      whereConditions.push({ value });
+    }
+
+    const [data, total] = await this.metaRepo.findAndCount({
+      where: whereConditions.length ? whereConditions : undefined,
+      order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async findByPostId(postId: string): Promise<PostMeta[]> {
     return this.metaRepo.find({ where: { post: { id: postId } } });
   }
 

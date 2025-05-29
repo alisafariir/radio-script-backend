@@ -1,5 +1,6 @@
 import { CategoryQueryDto } from '@/dtos';
 import { Category } from '@/entities';
+import { PaginateResponse } from '@/interfaces';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, ILike, TreeRepository } from 'typeorm';
@@ -23,7 +24,7 @@ export class CategoryService {
     return this.categoryRepo.save(category);
   }
 
-  findAll(query: CategoryQueryDto) {
+  async findAll(query: CategoryQueryDto): Promise<PaginateResponse<Category[]>> {
     const { search, name, slug, page = 1, limit = 10 } = query;
     const whereConditions: FindOptionsWhere<Category>[] = [];
 
@@ -36,12 +37,14 @@ export class CategoryService {
     if (slug) {
       whereConditions.push({ slug });
     }
-    return this.categoryRepo.findAndCount({
+    const [data, total] = await this.categoryRepo.findAndCount({
       where: whereConditions.length ? whereConditions : undefined,
       order: { created_at: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
     });
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   deleted() {

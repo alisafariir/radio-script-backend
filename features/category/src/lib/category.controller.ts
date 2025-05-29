@@ -1,8 +1,8 @@
 import { Roles } from '@/decorators';
-import { CreateCategoryDto } from '@/dtos';
+import { CategoryQueryDto, CreateCategoryDto } from '@/dtos';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -17,8 +17,8 @@ export class CategoryController {
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(@Query() query: CategoryQueryDto) {
+    return this.categoryService.findAll(query);
   }
 
   @Get('deleted')

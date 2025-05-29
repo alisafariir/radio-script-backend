@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { CommentQueryDto } from '@/dtos';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { CommentService } from './comment.service';
 
 @Controller('comments')
@@ -10,9 +11,14 @@ export class CommentController {
     return this.commentService.create(body.content, body.authorId, body.postId);
   }
 
+  @Get()
+  findAll(@Query() query: CommentQueryDto) {
+    return this.commentService.findAll(query);
+  }
+
   @Get('post/:postId')
-  findAll(@Param('postId') postId: string) {
-    return this.commentService.findAllByPost(postId);
+  findAllByPost(@Param('postId') postId: string, @Query() query: CommentQueryDto) {
+    return this.commentService.findAllByPost(postId, query);
   }
 
   @Delete(':id')

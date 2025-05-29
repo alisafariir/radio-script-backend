@@ -1,7 +1,8 @@
+import { CommentQueryDto } from '@/dtos';
 import { Comment, Post, User } from '@/entities';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class CommentService {
@@ -20,10 +21,54 @@ export class CommentService {
     return this.commentRepo.save(comment);
   }
 
-  findAllByPost(postId: string) {
-    return this.commentRepo.find({
-      where: { post: { id: postId } },
+  findAll(query: CommentQueryDto) {
+    const { search, authorId, postId, content, page = 1, limit = 10 } = query;
+    const whereConditions: FindOptionsWhere<Comment>[] = [];
+
+    if (search) {
+      whereConditions.push({ content: ILike(`%${search}%`) });
+    }
+
+    if (authorId) {
+      whereConditions.push({ author: { id: authorId } });
+    }
+
+    if (postId) {
+      whereConditions.push({ post: { id: postId } });
+    }
+
+    if (content) {
+      whereConditions.push({ content });
+    }
+
+    return this.commentRepo.findAndCount({
+      where: whereConditions.length ? whereConditions : undefined,
       order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
+
+  findAllByPost(postId: string, query: CommentQueryDto) {
+    const { search, authorId, content, page = 1, limit = 10 } = query;
+    const whereConditions: FindOptionsWhere<Comment>[] = [];
+
+    if (search) {
+      whereConditions.push({ content: ILike(`%${search}%`) });
+    }
+
+    if (authorId) {
+      whereConditions.push({ author: { id: authorId } });
+    }
+
+    if (content) {
+      whereConditions.push({ content });
+    }
+    return this.commentRepo.find({
+      where: { post: { id: postId, ...whereConditions } },
+      order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 

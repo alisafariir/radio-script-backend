@@ -1,3 +1,4 @@
+import { MediaQueryDto } from '@/dtos';
 import { Media } from '@/entities';
 import { S3Service } from '@/helpers';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -37,8 +38,12 @@ export class MediaService {
     return this.mediaRepo.findOne({ where: { id } });
   }
 
-  findAll(): Promise<Media[]> {
-    return this.mediaRepo.find();
+  findAll(query: MediaQueryDto): Promise<Media[]> {
+    const { page = 1, limit = 10 } = query;
+    return this.mediaRepo.find({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   async remove(id: string): Promise<Media> {

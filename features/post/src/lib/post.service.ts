@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreatePostDto, PostQueryDto, UpdatePostDto } from '@/dtos';
 import { Request } from 'express';
-import { FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 
 @Injectable()
 export class PostService {
@@ -26,12 +26,12 @@ export class PostService {
 
     // دسته‌بندی‌ها
     if (categoryIds?.length) {
-      post.categories = await this.categoryRepo.findByIds(categoryIds);
+      post.categories = await this.categoryRepo.find({ where: { id: In(categoryIds) } });
     }
 
     // برچسب‌ها
     if (tagIds?.length) {
-      post.tags = await this.tagRepo.findByIds(tagIds);
+      post.tags = await this.tagRepo.find({ where: { id: In(tagIds) } });
     }
 
     // تصویر شاخص

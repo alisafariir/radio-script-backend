@@ -1,7 +1,8 @@
+import { CategoryQueryDto } from '@/dtos';
 import { Category } from '@/entities';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TreeRepository } from 'typeorm';
+import { FindOptionsWhere, ILike, TreeRepository } from 'typeorm';
 
 @Injectable()
 export class CategoryService {
@@ -22,8 +23,25 @@ export class CategoryService {
     return this.categoryRepo.save(category);
   }
 
-  findAll() {
-    return this.categoryRepo.findTrees();
+  findAll(query: CategoryQueryDto) {
+    const { search, name, slug, page = 1, limit = 10 } = query;
+    const whereConditions: FindOptionsWhere<Category>[] = [];
+
+    if (search) {
+      whereConditions.push({ name: ILike(`%${search}%`) });
+    }
+    if (name) {
+      whereConditions.push({ name });
+    }
+    if (slug) {
+      whereConditions.push({ slug });
+    }
+    return this.categoryRepo.findAndCount({
+      where: whereConditions.length ? whereConditions : undefined,
+      order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   deleted() {

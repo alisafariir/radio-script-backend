@@ -1,7 +1,8 @@
+import { TagQueryDto } from '@/dtos';
 import { Tag } from '@/entities';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class TagService {
@@ -15,8 +16,27 @@ export class TagService {
     return this.tagRepo.save(tag);
   }
 
-  findAll() {
-    return this.tagRepo.find();
+  findAll(query: TagQueryDto) {
+    const { name, slug, search, page = 1, limit = 10 } = query;
+    const whereConditions: FindOptionsWhere<Tag>[] = [];
+
+    if (search) {
+      whereConditions.push({ name: ILike(`%${search}%`) });
+    }
+
+    if (name) {
+      whereConditions.push({ name });
+    }
+
+    if (slug) {
+      whereConditions.push({ slug });
+    }
+
+    return this.tagRepo.find({
+      where: whereConditions.length ? whereConditions : undefined,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   async findOne(id: string) {

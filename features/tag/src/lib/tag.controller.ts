@@ -1,8 +1,8 @@
 import { Roles } from '@/decorators';
-import { CreateTagDto } from '@/dtos';
+import { CreateTagDto, TagQueryDto } from '@/dtos';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { TagService } from './tag.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -17,8 +17,8 @@ export class TagController {
   }
 
   @Get()
-  findAll() {
-    return this.tagService.findAll();
+  findAll(@Query() query: TagQueryDto) {
+    return this.tagService.findAll(query);
   }
 
   @Get(':id')

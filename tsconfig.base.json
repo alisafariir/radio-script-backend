@@ -40,7 +40,7 @@
       "@/tags": ["features/tags/src/index.ts"],
       "@/token": ["features/token/src/index.ts"],
       "@/types": ["libs/types/src/index.ts"],
-      "@/user": ["features/user/src/index.ts"],
+      "@/users": ["features/users/src/index.ts"],
       "@/health": ["features/health/src/index.ts"]
     }
   },

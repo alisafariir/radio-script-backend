@@ -6,7 +6,7 @@ import { OtpModule } from '@/otp';
 import { SmsModule } from '@/sms';
 import { GithubStrategy, GoogleStrategy, JwtStrategy, RefreshTokenStrategy } from '@/strategies';
 import { TokenModule } from '@/token';
-import { UserModule } from '@/user';
+import { UserModule } from '@/users';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';

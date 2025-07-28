@@ -18,7 +18,7 @@ export class PostMetaController {
 
   @Get('post/:postId')
   findAll(@Param('postId') postId: string) {
-    return this.metaService.findAll(postId);
+    return this.metaService.findByPostId(postId);
   }
 
   @Patch(':id')

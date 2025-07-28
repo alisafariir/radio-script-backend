@@ -1,13 +1,13 @@
-import { Controller, Delete, Get, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 
 import { Roles } from '@/decorators';
+import { MediaQueryDto } from '@/dtos';
 import { UserRole } from '@/enums';
 import { JwtAuthGuard, RolesGuard } from '@/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { memoryStorage } from 'multer';
 import { MediaService } from './media.service';
-
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 @Controller('media')
@@ -27,8 +27,8 @@ export class MediaController {
   }
 
   @Get()
-  findAll() {
-    return this.mediaService.findAll();
+  findAll(@Query() query: MediaQueryDto) {
+    return this.mediaService.findAll(query);
   }
 
   @Get(':id')

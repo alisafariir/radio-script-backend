@@ -1,6 +1,5 @@
-export * from './lib/auth/login.interface';
-export * from './lib/auth/user-response.interface';
-
-export * from './lib/device/device.interface';
-
-export * from './lib/sms/sms-response.model';
+export * from './lib/auth';
+export * from './lib/device';
+export * from './lib/responses';
+export * from './lib/sms';
+export * from './lib/user';
